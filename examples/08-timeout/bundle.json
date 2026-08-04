@@ -1,0 +1,30 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Timeout",
+  "description": "A rule slower than the scenario's timeout, asserted as an expected timeout so the test passes.",
+  "rules": [
+    {
+      "id": "too-slow",
+      "name": "Answer after 2500 ms",
+      "priority": 10,
+      "match": { "operation": "HANGS" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "body": "{\"never\":\"seen in time\"}",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "delayMs": 2500
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "timeout-is-expected",
+      "description": "The mock takes 2500 ms but the scenario allows only 500 ms. `expect.timeout` makes the timeout the passing outcome.",
+      "request": { "operation": "HANGS" },
+      "timeoutMs": 500,
+      "expect": { "timeout": true }
+    }
+  ]
+}

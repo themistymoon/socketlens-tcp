@@ -1,0 +1,25 @@
+{
+  "name": "@socketlens/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SocketLens TCP command-line client: the primary SLTP client, fully functional without the graphical interface.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "socketlens": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@socketlens/core": "0.1.0",
+    "@socketlens/protocol": "0.1.0"
+  }
+}

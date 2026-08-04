@@ -1,0 +1,44 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Passing test with a UTF-8 body",
+  "description": "A normal passing test whose response body makes the byte-versus-character distinction visible.",
+  "rules": [
+    {
+      "id": "greet-th",
+      "name": "Greet in Thai",
+      "priority": 10,
+      "match": { "operation": "GREET" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8",
+          "X-Demo": "byte-length"
+        },
+        "body": "{\"message\":\"สวัสดี\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "utf8-body-passes",
+      "description": "Asserts the status, two headers and a JSON subset. Content-Length is 32 bytes even though the body is only 20 characters long.",
+      "request": {
+        "operation": "GREET",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"locale\":\"th\"}"
+      },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": {
+          "Content-Length": "32",
+          "X-Demo": "byte-length"
+        },
+        "jsonSubset": { "message": "สวัสดี" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "SocketLens TCP tests",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // Vitest resolves the workspace packages through the aliases in vitest.config.ts and
+    // bundles the sources directly, so this project mirrors that resolution rather than
+    // NodeNext. It is the only way one project can typecheck both the Node-side tests and
+    // the `.tsx` component tests, whose GUI imports are written in bundler style.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false,
+    "noEmit": true,
+    "paths": {
+      "@socketlens/protocol/browser": ["./packages/protocol/src/browser.ts"],
+      "@socketlens/protocol": ["./packages/protocol/src/index.ts"],
+      "@socketlens/core/models": ["./packages/core/src/models.ts"],
+      "@socketlens/core": ["./packages/core/src/index.ts"],
+      "@socketlens/server": ["./apps/server/src/index.ts"]
+    }
+  },
+  "include": ["tests/**/*.ts", "tests/**/*.tsx"]
+}

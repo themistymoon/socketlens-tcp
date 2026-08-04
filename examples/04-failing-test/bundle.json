@@ -1,0 +1,32 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Expected versus actual failure",
+  "description": "A test that deliberately fails, so the failure reporting can be inspected. The SLTP exchange itself succeeds.",
+  "rules": [
+    {
+      "id": "returns-500",
+      "name": "Simulate a broken upstream",
+      "priority": 10,
+      "match": { "operation": "CHECKOUT" },
+      "response": {
+        "statusCode": 500,
+        "statusPhrase": "INTERNAL SERVER ERROR",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"error\":\"upstream unavailable\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "expected-200-got-500",
+      "description": "The scenario expects 200 OK but the mock rule answers 500. Two assertions fail and the run reports 211 TEST FAILED.",
+      "request": { "operation": "CHECKOUT" },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 200,
+        "statusPhrase": "OK"
+      }
+    }
+  ]
+}

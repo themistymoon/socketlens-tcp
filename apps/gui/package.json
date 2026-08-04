@@ -1,0 +1,18 @@
+{
+  "name": "@socketlens/gui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SocketLens TCP graphical client: a local React developer interface for sessions, mock rules, scenarios, and SLTP message inspection.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@socketlens/protocol": "0.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

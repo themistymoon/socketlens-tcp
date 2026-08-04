@@ -1,0 +1,56 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Fragmented message",
+  "description": "One SLTP request written as seven separate TCP writes, with cuts placed at the worst possible offsets.",
+  "rules": [
+    {
+      "id": "echo-frag",
+      "name": "Echo a fragmented request",
+      "priority": 10,
+      "match": {
+        "operation": "ECHO",
+        "body": { "mode": "contains", "value": "split me please" }
+      },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"received\":\"one complete message\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "seven-fragments",
+      "description": "134 bytes written as 7 fragments. The rule matches on body content, which can only happen if the peer reassembled every fragment into one message.",
+      "request": {
+        "raw": "SLTP/1.0 ECHO\\r\\nRequest-ID: req-frag-1\\r\\nContent-Type: application/json; charset=utf-8\\r\\nContent-Length: 26\\r\\n\\r\\n{\"note\":\"split me please\"}"
+      },
+      "transmission": {
+        "mode": "fragmented",
+        "fragmentSizes": [6, 14, 18, 22, 47, 13, 14],
+        "interFragmentDelayMs": 25
+      },
+      "timeoutMs": 5000,
+      "expect": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "jsonSubset": { "received": "one complete message" }
+      }
+    },
+    {
+      "name": "byte-at-a-time",
+      "description": "The same request written one byte per TCP write. The pathological case for any parser that assumes a read contains a whole message.",
+      "request": {
+        "raw": "SLTP/1.0 ECHO\\r\\nRequest-ID: req-frag-2\\r\\nContent-Type: application/json; charset=utf-8\\r\\nContent-Length: 26\\r\\n\\r\\n{\"note\":\"split me please\"}"
+      },
+      "transmission": { "mode": "fragmented", "fragmentCount": 134 },
+      "timeoutMs": 8000,
+      "expect": {
+        "statusCode": 200,
+        "jsonSubset": { "received": "one complete message" }
+      }
+    }
+  ]
+}

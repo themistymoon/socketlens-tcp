@@ -1,0 +1,59 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Disconnect during a message",
+  "description": "Both directions of a truncated message: the mock dies mid-response, and the client aborts mid-request.",
+  "rules": [
+    {
+      "id": "dies-mid-response",
+      "name": "Send 40 bytes then hang up",
+      "priority": 10,
+      "match": { "operation": "TRUNCATE_ME" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"payload\":\"this body never fully arrives\"}",
+        "disconnectAfterBytes": 40
+      }
+    },
+    {
+      "id": "never-reached",
+      "name": "Would answer a complete ABORTED request",
+      "priority": 10,
+      "match": { "operation": "ABORTED" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "body": "{\"unreachable\":true}",
+        "headers": { "Content-Type": "application/json; charset=utf-8" }
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "peer-closes-mid-response",
+      "description": "The mock writes only the first 40 bytes of its response and then closes. The client holds an incomplete message and must report a truncated read rather than parsing garbage.",
+      "request": { "operation": "TRUNCATE_ME" },
+      "timeoutMs": 3000,
+      "expect": { "disconnect": true }
+    },
+    {
+      "name": "client-aborts-mid-request",
+      "description": "The client stops writing after 30 bytes and closes. The peer's decoder is left holding a partial header block, which it must discard on close without crashing.",
+      "request": {
+        "operation": "ABORTED",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"this\":\"is never fully sent\"}"
+      },
+      "transmission": {
+        "mode": "fragmented",
+        "fragmentSizes": [15, 15],
+        "interFragmentDelayMs": 20,
+        "disconnectAfterBytes": 30
+      },
+      "timeoutMs": 3000,
+      "expect": { "disconnect": true }
+    }
+  ]
+}

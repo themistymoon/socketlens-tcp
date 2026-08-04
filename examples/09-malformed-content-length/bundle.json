@@ -1,0 +1,47 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Malformed Content-Length",
+  "description": "Three framing faults that must be rejected before any rule is consulted. No rules are needed.",
+  "rules": [],
+  "scenarios": [
+    {
+      "name": "non-numeric-content-length",
+      "description": "Content-Length: abc cannot be parsed, so the body length is unknowable and the stream cannot be resynchronised. The peer answers 400 and closes.",
+      "request": {
+        "raw": "SLTP/1.0 ECHO\\r\\nRequest-ID: req-bad-1\\r\\nContent-Length: abc\\r\\n\\r\\n{}"
+      },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 400,
+        "statusPhrase": "BAD REQUEST",
+        "headers": { "Reason": "invalid-content-length" }
+      }
+    },
+    {
+      "name": "negative-content-length",
+      "description": "Content-Length: -1 is syntactically a number but cannot describe a body. Rejected with its own distinct reason code.",
+      "request": {
+        "raw": "SLTP/1.0 ECHO\\r\\nRequest-ID: req-bad-2\\r\\nContent-Length: -1\\r\\n\\r\\n{}"
+      },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 400,
+        "statusPhrase": "BAD REQUEST",
+        "headers": { "Reason": "negative-content-length" }
+      }
+    },
+    {
+      "name": "duplicate-content-length",
+      "description": "Two Content-Length headers disagree about where the body ends. Accepting either one would risk desynchronising the stream, so the message is rejected.",
+      "request": {
+        "raw": "SLTP/1.0 ECHO\\r\\nRequest-ID: req-bad-3\\r\\nContent-Length: 2\\r\\nContent-Length: 9\\r\\n\\r\\n{}"
+      },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 400,
+        "statusPhrase": "BAD REQUEST"
+      }
+    }
+  ]
+}

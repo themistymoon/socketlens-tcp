@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.tsbuild/
+coverage/
+*.tsbuildinfo
+package-lock.json

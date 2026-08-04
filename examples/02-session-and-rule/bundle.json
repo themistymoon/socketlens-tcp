@@ -1,0 +1,56 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Session and rules",
+  "description": "Installs two rules with different priorities and shows that rule ordering is deterministic.",
+  "rules": [
+    {
+      "id": "catch-all",
+      "name": "Fallback for any operation",
+      "priority": 0,
+      "match": { "operation": "*" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"matched\":\"catch-all\"}"
+      }
+    },
+    {
+      "id": "ping-specific",
+      "name": "Specific PING rule",
+      "priority": 10,
+      "match": { "operation": "PING" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"matched\":\"ping-specific\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "priority-wins",
+      "description": "PING matches the priority 10 rule, not the priority 0 catch-all, even though both match.",
+      "request": { "operation": "PING" },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 200,
+        "headers": { "Matched-Rule-ID": "ping-specific" },
+        "jsonSubset": { "matched": "ping-specific" }
+      }
+    },
+    {
+      "name": "fallback-applies",
+      "description": "An operation with no specific rule falls through to the catch-all.",
+      "request": { "operation": "SERVER_INFO" },
+      "timeoutMs": 2000,
+      "expect": {
+        "statusCode": 200,
+        "headers": { "Matched-Rule-ID": "catch-all" },
+        "jsonSubset": { "matched": "catch-all" }
+      }
+    }
+  ]
+}

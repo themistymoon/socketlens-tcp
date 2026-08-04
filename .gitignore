@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.tsbuild/
+*.tsbuildinfo
+
+# Test output
+coverage/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs and local scratch data
+*.log
+npm-debug.log*
+.env
+.env.*
+!.env.example
+tmp/
+scratch/
+
+# Exported artifacts produced at runtime by SocketLens TCP
+exports/

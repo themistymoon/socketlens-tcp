@@ -1,0 +1,49 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Two concurrent clients",
+  "description": "Rules used by the custom concurrency runner. Each client gets its own session, so each installs these rules into its own isolated rule set.",
+  "rules": [
+    {
+      "id": "slow-a",
+      "name": "Slow answer",
+      "priority": 10,
+      "match": { "operation": "SLOW_QUERY" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"client\":\"slow\"}",
+        "delayMs": 600
+      }
+    },
+    {
+      "id": "fast-a",
+      "name": "Fast answer",
+      "priority": 10,
+      "match": { "operation": "PING" },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"client\":\"fast\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "slow-client-work",
+      "description": "The work the slow client performs. The runner drives this concurrently with the fast client's PING.",
+      "request": { "operation": "SLOW_QUERY" },
+      "timeoutMs": 5000,
+      "expect": { "statusCode": 200, "jsonSubset": { "client": "slow" } }
+    },
+    {
+      "name": "fast-client-work",
+      "description": "The work the fast client performs, and which must finish while the slow client is still waiting.",
+      "request": { "operation": "PING" },
+      "timeoutMs": 5000,
+      "expect": { "statusCode": 200, "jsonSubset": { "client": "fast" } }
+    }
+  ]
+}

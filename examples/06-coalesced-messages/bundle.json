@@ -1,0 +1,63 @@
+{
+  "format": "socketlens-scenario-bundle/1",
+  "protocol": "SLTP/1.0",
+  "name": "Coalesced messages",
+  "description": "Two complete SLTP requests written in a single TCP write, producing two responses.",
+  "rules": [
+    {
+      "id": "echo-first",
+      "name": "Answer the first coalesced request",
+      "priority": 10,
+      "match": {
+        "operation": "ECHO",
+        "body": { "mode": "contains", "value": "\"which\":\"first\"" }
+      },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"answer\":\"first\"}"
+      }
+    },
+    {
+      "id": "echo-second",
+      "name": "Answer the second coalesced request",
+      "priority": 10,
+      "match": {
+        "operation": "ECHO",
+        "body": { "mode": "contains", "value": "\"which\":\"second\"" }
+      },
+      "response": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "headers": { "Content-Type": "application/json; charset=utf-8" },
+        "body": "{\"answer\":\"second\"}"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "two-messages-one-write",
+      "description": "Both requests are concatenated into one buffer and written once. The peer must split them apart on Content-Length alone, and two distinct rules must match.",
+      "request": {
+        "operation": "ECHO",
+        "headers": { "Request-ID": "req-coalesce-a" },
+        "body": "{\"which\":\"first\"}"
+      },
+      "transmission": {
+        "mode": "coalesced",
+        "coalesceWith": {
+          "operation": "ECHO",
+          "headers": { "Request-ID": "req-coalesce-b" },
+          "body": "{\"which\":\"second\"}"
+        }
+      },
+      "timeoutMs": 5000,
+      "expect": {
+        "statusCode": 200,
+        "statusPhrase": "OK",
+        "jsonSubset": { "answer": "first" }
+      }
+    }
+  ]
+}

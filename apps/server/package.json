@@ -1,0 +1,31 @@
+{
+  "name": "@socketlens/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SocketLens TCP server: a raw TCP (node:net) SLTP endpoint hosting sessions, mock rules, and test execution.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "socketlens-server": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@socketlens/core": "0.1.0",
+    "@socketlens/protocol": "0.1.0"
+  }
+}
