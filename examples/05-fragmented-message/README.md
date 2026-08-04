@@ -103,10 +103,11 @@ guarantee:
 - **Byte stream** — and that is all. There are no records, no frames, no messages.
 
 TCP does not promise that one `write()` becomes one `read()`. The sending kernel may
-merge or split writes based on Nagle's algorithm, the congestion window, and the path
-MTU; routers may fragment; the receiving kernel delivers whatever has arrived when
-the application happens to ask. `socket.write()` is not a message-sending function.
-It appends bytes to a stream.
+split a write across segments when it exceeds the path MTU or the congestion window,
+and may merge consecutive small writes into one segment — that second behaviour is
+Nagle's algorithm, which is why this example pauses between fragments. The receiving
+kernel delivers whatever has arrived when the application happens to ask.
+`socket.write()` is not a message-sending function. It appends bytes to a stream.
 
 Message boundaries are therefore an **application-layer** concern, and every
 stream protocol has to invent them. SLTP uses the same mechanism HTTP/1.1 does: a

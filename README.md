@@ -41,9 +41,10 @@ an incremental decoder in this repository. The one place local HTTP appears is
   fragmentation and coalescing are real rather than simulated in-process.
 - **Deterministic mock rules.** Rules are evaluated by priority descending, then by
   insertion order ascending, so the matching outcome never depends on iteration luck.
-- **Three clients, one protocol.** A TCP control server, a command-line client that speaks
-  SLTP over raw TCP directly and is fully usable without the graphical interface, and a
-  React interface for inspecting traffic visually.
+- **Three clients, one protocol.** A command-line client that speaks SLTP over raw TCP
+  directly and is fully usable on its own, a loopback bridge that owns a socket on the
+  browser's behalf, and a React interface for inspecting traffic visually. All three drive
+  the same TCP control server.
 - **Request-ID correlation.** Every request carries a `Request-ID` and every response
   repeats it, so several requests may be in flight on one connection at once without
   relying on strict ordering.
@@ -204,12 +205,15 @@ practice:
 
 > one `write()` **≠** one `data` event **≠** one message
 
-A single `write()` may be split across several segments by the sender's stack, by path MTU,
-or by Nagle's algorithm interacting with delayed acknowledgements. Several `write()` calls
-may be merged into one segment. The receiver's `data` event fires when bytes are available,
-not when a message is complete, so a handler that parses each `data` event as one message is
-correct only by accident — and only in the small, fast, local case that most manual testing
-exercises.
+A single `write()` may be split across several segments: the path MTU, the congestion
+window, and the receiver's advertised window all bound how much may leave at once, and a
+large write simply does not fit in one segment. Conversely, several `write()` calls may be
+merged into one segment — which is precisely what Nagle's algorithm does to small writes
+while an acknowledgement is outstanding, and why example 05 has to pause between fragments
+to keep the kernel from reassembling them. The receiver's `data` event fires when bytes are
+available, not when a message is complete, so a handler that parses each `data` event as one
+message is correct only by accident — and only in the small, fast, local case that most
+manual testing exercises.
 
 ```mermaid
 flowchart LR
@@ -326,7 +330,7 @@ coalescing behaviour it records is genuine.
 | [`apps/gui`](apps/gui/)                   | React interface for sessions, rules, scenarios, and message inspection.                                                                                                  |
 | [`docs`](docs/)                           | Requirements, architecture, protocol specification, status codes, test plan and results, guides, and the Thai-language report material.                                  |
 | [`examples`](examples/)                   | Eleven runnable scenario bundles plus the runner that checks them.                                                                                                       |
-| [`tests`](tests/)                         | Vitest suites: protocol, core, CLI, and server integration tests.                                                                                                        |
+| [`tests`](tests/)                         | Vitest suites: protocol, core, CLI, server integration, and interface logic tests.                                                                                       |
 | [`scripts`](scripts/)                     | `clean.mjs` and `dev-gui.mjs`, the development launcher.                                                                                                                 |
 
 ---
@@ -349,8 +353,8 @@ coalescing behaviour it records is genuine.
 | [`docs/demo-script-th.md`](docs/demo-script-th.md)                     | สคริปต์การสาธิต — live demonstration script, in Thai.                                                            |
 | [`docs/anticipated-questions-th.md`](docs/anticipated-questions-th.md) | คำถามที่คาดว่าจะถูกถาม — anticipated questions and answers, in Thai.                                             |
 
-Some of these documents are being written alongside the code and may be incomplete at the
-moment you read this. [`docs/requirements.md`](docs/requirements.md) and
+All thirteen documents are complete for 0.1.0.
+[`docs/requirements.md`](docs/requirements.md) and
 [`docs/architecture.md`](docs/architecture.md) are the two to start from.
 
 ---
@@ -398,8 +402,9 @@ Vitest resolves the workspace aliases to TypeScript **sources**, so `npm test` n
 requires a prior build. Suites live in [`tests`](tests/) and are organised by layer:
 `tests/protocol` for encoding, incremental decoding, and validation; `tests/core` for rule
 matching, assertions, the session store, and scenario validation; `tests/cli` for argument
-parsing, dispatch, help, and rendering; and `tests/server` for integration tests that bind
-real TCP ports and exercise concurrency and full scenario runs. Because those integration
+parsing, dispatch, help, and rendering; `tests/server` for integration tests that bind
+real TCP ports and exercise concurrency and full scenario runs; and `tests/gui` for the
+interface's field parsing and result rendering. Because those integration
 tests use genuine sockets, the timeout ceiling is set generously in
 [`vitest.config.ts`](vitest.config.ts).
 
@@ -448,8 +453,13 @@ These are deliberate boundaries for this release, not oversights.
 - **Text-based protocol only.** SLTP/1.0 has no binary framing mode, no TLS, and no
   compression. Header values are printable US-ASCII; anything needing Unicode belongs in
   the body, which is always UTF-8.
-- **One protocol.** The tool tests SLTP. It is not a general client for arbitrary
-  third-party protocols.
+- **One protocol implemented, not a universal client.** The framing, mock rules, and
+  assertions are SLTP/1.0-specific. SLTP is the worked example the tool ships with — the
+  thing you design, mock, test, and debug — and the escape hatch for anything else is raw
+  bytes: `raw --text` and a scenario's `request.raw` put arbitrary octets on the wire, but
+  the reply is still framed and asserted as SLTP. Point it at another protocol's server and
+  you will see the bytes, not a parse. Targets must be loopback or a host you name with
+  `--allow-target`.
 - **Bounded by design.** A message over the configured limit is fatal for its connection,
   because a stream whose framing has been lost cannot be resynchronised at a message
   boundary.

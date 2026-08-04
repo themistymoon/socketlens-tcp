@@ -100,7 +100,7 @@ Documentation and implementation are expected to agree at every commit.
 
 - **Every protocol example in any document must be valid per the current implementation** — a registered operation, a registered status code and its exact canonical phrase, real header names, CRLF line endings, and a `Content-Length` that is the correct **byte** count. Bytes and characters differ for any non-ASCII body.
 - `npm run examples` enforces this for `examples/`: the runner exits non-zero when an example's README disagrees with the code. If you change protocol behaviour, update the affected example README in the same change.
-- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. Its doc comment names a `docs/status-codes.md` generated from it; that file does not exist yet. If you create it, generate it from the registry rather than hand-writing a copy that can drift. `docs/` currently holds `architecture.md` and `requirements.md`.
+- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. `docs/status-codes.md` documents the status registry in full but is **maintained by hand**, so nothing mechanically stops the two from drifting — change the registry and you must update that document in the same change. Generating it is a roadmap item. `docs/` holds thirteen documents; see the table in `README.md`.
 - A protocol change that leaves a stale example anywhere is an incomplete change.
 
 ## Working notes

@@ -34,7 +34,7 @@ Any change here will be a new format version. `socketlens-scenario-bundle/1` wil
 
 ### Documentation of the wire format as a specification
 
-The operation and status registries in `packages/protocol` are already the normative source, and the status registry's own documentation anticipates a `docs/status-codes.md` generated from it so the two cannot drift. That generated file does not exist yet; `docs/` currently holds `architecture.md` and `requirements.md`. Writing the generator, and extending it to the operation registry and the header set, would give SLTP a specification document that is checked rather than maintained by hand — consistent with the rule that documentation and implementation must agree.
+The operation and status registries in `packages/protocol` are already the normative source, and [`docs/status-codes.md`](docs/status-codes.md) documents the status registry in full. That document is currently maintained by hand, which is exactly the drift risk the project warns about elsewhere: nothing mechanically enforces that it matches `SLTP_STATUS_REGISTRY`. Generating it from the registry instead, and extending the generator to the operation registry and the header set, would give SLTP a specification document that is checked rather than maintained by hand — consistent with the rule that documentation and implementation must agree.
 
 ### Interface parity with the CLI
 

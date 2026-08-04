@@ -58,8 +58,10 @@ export const SLTP_STATUS = {
 export type SltpStatusCode = (typeof SLTP_STATUS)[keyof typeof SLTP_STATUS];
 
 /**
- * The registry, ordered by code. `docs/status-codes.md` is generated from the same
- * information and MUST stay identical to this table.
+ * The registry, ordered by code. `docs/status-codes.md` documents the same information
+ * and MUST stay identical to this table. It is currently maintained by hand, so a change
+ * here is incomplete until that document is updated to match; generating it from this
+ * registry is tracked in `ROADMAP.md`.
  */
 export const SLTP_STATUS_REGISTRY: readonly SltpStatusDefinition[] = [
   {
