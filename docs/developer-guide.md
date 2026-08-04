@@ -42,14 +42,16 @@ TypeScript, Vitest, Vite, ESLint, Prettier, `tsx` — is a root devDependency.
 ### Install
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/themistymoon/socketlens-tcp.git
 cd socketlens-tcp
-npm install
+npm ci
 ```
 
-`npm install` at the root installs for every workspace and symlinks each `@socketlens/*`
-package into the root `node_modules`, which is what makes `import ... from
-'@socketlens/core'` resolve at all.
+`npm ci` installs exactly what `package-lock.json` records, which is what CI does and what
+keeps a local run comparable to a CI run. Use `npm install` only when you are deliberately
+adding or changing a dependency. Either way, installing at the root installs for every
+workspace and symlinks each `@socketlens/*` package into the root `node_modules`, which is
+what makes `import ... from '@socketlens/core'` resolve at all.
 
 ### First build
 
@@ -71,7 +73,7 @@ npm test
 ```
 
 The test suite does **not** require the build: Vitest resolves every workspace import to
-TypeScript source (§4). A clean checkout can go straight from `npm install` to `npm test`.
+TypeScript source (§4). A clean checkout can go straight from `npm ci` to `npm test`.
 
 At the time of writing that is 16 test files and 434 tests, finishing in a couple of
 seconds. Roughly a quarter of them open real TCP sockets on loopback.

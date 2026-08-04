@@ -20,9 +20,9 @@ core, server, CLI and bridge packages have zero runtime dependencies, and React 
 by the graphical interface.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/themistymoon/socketlens-tcp.git
 cd socketlens-tcp
-npm install
+npm ci
 npm run build
 ```
 

@@ -4,6 +4,25 @@
   "private": true,
   "description": "A local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.",
   "license": "MIT",
+  "author": "Natthakit Jantawong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/themistymoon/socketlens-tcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/themistymoon/socketlens-tcp/issues"
+  },
+  "homepage": "https://github.com/themistymoon/socketlens-tcp#readme",
+  "keywords": [
+    "tcp",
+    "socket",
+    "protocol",
+    "protocol-design",
+    "message-framing",
+    "mock-server",
+    "network-debugging",
+    "sltp"
+  ],
   "type": "module",
   "engines": {
     "node": ">=20.11.0"
