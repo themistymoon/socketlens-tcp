@@ -69,9 +69,9 @@ an incremental decoder in this repository. The one place local HTTP appears is
 ## Installation
 
 ```bash
-git clone <repository-url> socketlens-tcp
+git clone https://github.com/themistymoon/socketlens-tcp.git
 cd socketlens-tcp
-npm install
+npm ci
 npm run build
 ```
 
