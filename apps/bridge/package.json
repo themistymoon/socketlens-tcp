@@ -19,7 +19,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@socketlens/core": "0.1.0",
-    "@socketlens/protocol": "0.1.0"
+    "@socketlens/core": "0.1.1",
+    "@socketlens/protocol": "0.1.1"
   }
 }

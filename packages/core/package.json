@@ -25,6 +25,6 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@socketlens/protocol": "0.1.0"
+    "@socketlens/protocol": "0.1.1"
   }
 }
