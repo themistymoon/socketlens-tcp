@@ -3,6 +3,9 @@ node_modules/
 
 # Build output
 dist/
+# ...except the bridge's static-hosting test fixture, which is a checked-in
+# stand-in for a built interface, not build output.
+!tests/bridge/fixtures/dist/
 .tsbuild/
 *.tsbuildinfo
 
