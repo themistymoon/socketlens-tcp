@@ -1,6 +1,6 @@
 {
   "name": "@socketlens/server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "SocketLens TCP server: a raw TCP (node:net) SLTP endpoint hosting sessions, mock rules, and test execution.",
   "license": "MIT",

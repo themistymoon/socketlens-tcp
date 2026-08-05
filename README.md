@@ -2,7 +2,7 @@
 
 **A local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.**
 
-Version 0.1.0 · MIT licence · Node.js >= 20.11.0
+Version 0.1.1 · MIT licence · Node.js >= 20.11.0
 
 If you build a protocol directly on TCP, you inherit a problem that HTTP libraries normally
 hide from you: TCP gives you a reliable, ordered stream of bytes and nothing else. It does
@@ -175,7 +175,7 @@ client can correlate it:
 ```
 SLTP/1.0 200 OK
 Request-ID: req-1
-Server: SocketLens-TCP/0.1.0
+Server: SocketLens-TCP/0.1.1
 Timestamp: 2026-08-04T09:15:22.418Z
 Content-Type: application/json; charset=utf-8
 Content-Length: 125
@@ -353,7 +353,7 @@ coalescing behaviour it records is genuine.
 | [`docs/demo-script-th.md`](docs/demo-script-th.md)                     | สคริปต์การสาธิต — live demonstration script, in Thai.                                                            |
 | [`docs/anticipated-questions-th.md`](docs/anticipated-questions-th.md) | คำถามที่คาดว่าจะถูกถาม — anticipated questions and answers, in Thai.                                             |
 
-All thirteen documents are complete for 0.1.0.
+All thirteen documents are complete for 0.1.1.
 [`docs/requirements.md`](docs/requirements.md) and
 [`docs/architecture.md`](docs/architecture.md) are the two to start from.
 

@@ -1,6 +1,6 @@
 # Test Results
 
-Recorded results of the verification suite for SocketLens TCP 0.1.0.
+Recorded results of the verification suite for SocketLens TCP 0.1.1.
 
 > Every figure in this document is copied from actual command output. Nothing here is
 > estimated, projected, or rounded up. Where a result is imperfect it is recorded as it
@@ -15,7 +15,7 @@ This document records what happened when it ran.
 
 | Item        | Value               |
 | ----------- | ------------------- |
-| Date of run | 2026-08-04          |
+| Date of run | 2026-08-05          |
 | Platform    | Windows 11, `win32` |
 | Node.js     | **v26.5.1**         |
 | Vitest      | 3.2.7               |
@@ -38,11 +38,11 @@ pass on an untested version is weaker evidence than the matrix, and the differen
 | Formatting                 | `prettier --check .`     | **pass** — all matched files     |
 | Linting                    | `eslint .`               | **pass** — 0 errors, 31 warnings |
 | Type checking              | `tsc -b` + `tsc -p`      | **pass** — no diagnostics        |
-| Unit and integration tests | `vitest run`             | **pass** — 434 / 434             |
+| Unit and integration tests | `vitest run`             | **pass** — 598 / 598             |
 | Production build           | `build:ts` + `build:gui` | **pass**                         |
 | Runnable examples          | `npm run examples`       | **pass** — 17 / 17 checks        |
 
-Total: **434 automated tests** across 16 files, plus **17 example checks** across 11
+Total: **598 automated tests** across 21 files, plus **17 example checks** across 11
 example bundles.
 
 ---
@@ -50,50 +50,65 @@ example bundles.
 ## 1. Test suite
 
 ```
- Test Files  16 passed (16)
-      Tests  434 passed (434)
-   Duration  1.88s (transform 1.56s, collect 6.73s, tests 1.97s, prepare 3.16s)
+ Test Files  21 passed (21)
+      Tests  598 passed (598)
+   Duration  5.31s (transform 2.07s, collect 9.81s, tests 8.43s, prepare 5.26s)
 ```
 
 ### Per-file results
 
-| File                               |   Tests |   Time | Layer                                 |
-| ---------------------------------- | ------: | -----: | ------------------------------------- |
-| `tests/protocol/decoder.test.ts`   |      55 |  18 ms | framing, the core correctness concern |
-| `tests/protocol/encoder.test.ts`   |      17 |  11 ms | message serialisation                 |
-| `tests/protocol/validate.test.ts`  |      21 |  10 ms | structural validation                 |
-| `tests/core/validation.test.ts`    |      56 |  17 ms | bundle, rule, and scenario validation |
-| `tests/core/matching.test.ts`      |      42 |  13 ms | rule matching and ordering            |
-| `tests/core/assertions.test.ts`    |      29 |  11 ms | expected-versus-actual comparison     |
-| `tests/core/session-store.test.ts` |      36 | 125 ms | session and rule lifecycle            |
-| `tests/cli/options.test.ts`        |      32 |  16 ms | argument parsing                      |
-| `tests/cli/dispatch.test.ts`       |      29 |  49 ms | command routing                       |
-| `tests/cli/render.test.ts`         |      26 |  28 ms | output formatting                     |
-| `tests/cli/help.test.ts`           |      15 |  10 ms | help text                             |
-| `tests/gui/form-parsing.test.ts`   |      18 |   7 ms | editor field parsing                  |
-| `tests/gui/result-view.test.tsx`   |       6 |  65 ms | result panel rendering                |
-| `tests/server/server.test.ts`      |      20 | 365 ms | integration, real TCP sockets         |
-| `tests/server/scenarios.test.ts`   |      19 | 728 ms | integration, scenario execution       |
-| `tests/server/concurrency.test.ts` |      13 | 499 ms | integration, multiple clients         |
-| **Total**                          | **434** |        |                                       |
+| File                               |   Tests |    Time | Layer                                 |
+| ---------------------------------- | ------: | ------: | ------------------------------------- |
+| `tests/protocol/decoder.test.ts`   |      55 |   25 ms | framing, the core correctness concern |
+| `tests/protocol/encoder.test.ts`   |      17 |   15 ms | message serialisation                 |
+| `tests/protocol/validate.test.ts`  |      21 |   16 ms | structural validation                 |
+| `tests/core/validation.test.ts`    |      56 |   26 ms | bundle, rule, and scenario validation |
+| `tests/core/matching.test.ts`      |      42 |   18 ms | rule matching and ordering            |
+| `tests/core/assertions.test.ts`    |      29 |   17 ms | expected-versus-actual comparison     |
+| `tests/core/session-store.test.ts` |      36 |  153 ms | session and rule lifecycle            |
+| `tests/cli/options.test.ts`        |      32 |   18 ms | argument parsing                      |
+| `tests/cli/dispatch.test.ts`       |      29 |   86 ms | command routing                       |
+| `tests/cli/render.test.ts`         |      26 |   48 ms | output formatting                     |
+| `tests/cli/help.test.ts`           |      15 |   16 ms | help text                             |
+| `tests/cli/repl.test.ts`           |      33 |  599 ms | interactive mode, real sockets        |
+| `tests/bridge/options.test.ts`     |      50 |   13 ms | bridge argument parsing               |
+| `tests/bridge/events.test.ts`      |      17 |   40 ms | Server-Sent-Events fan-out            |
+| `tests/bridge/relay.test.ts`       |      25 | 3843 ms | relay contracts, real sockets         |
+| `tests/bridge/http.test.ts`        |      39 | 1661 ms | bridge routes, real `fetch`           |
+| `tests/gui/form-parsing.test.ts`   |      18 |    9 ms | editor field parsing                  |
+| `tests/gui/result-view.test.tsx`   |       6 |  134 ms | result panel rendering                |
+| `tests/server/server.test.ts`      |      20 |  462 ms | integration, real TCP sockets         |
+| `tests/server/scenarios.test.ts`   |      19 |  816 ms | integration, scenario execution       |
+| `tests/server/concurrency.test.ts` |      13 |  532 ms | integration, multiple clients         |
+| **Total**                          | **598** |         |                                       |
 
 The three `tests/server/*` files bind real TCP ports on the loopback interface rather than
 mocking the socket layer. That is deliberate: a mocked socket would deliver bytes in exactly
 the groupings the test chose, which is precisely the assumption the whole project exists to
-disprove. Their longer run times — 365 ms to 728 ms against single-digit milliseconds for the
+disprove. Their longer run times — 462 ms to 816 ms against single-digit milliseconds for the
 unit suites — are the cost of using a real network stack, and are worth paying.
+
+The bridge suites make the same trade and pay more for it. `relay.test.ts` at 3843 ms and
+`http.test.ts` at 1661 ms are dominated by three tests that each wait out a deliberate
+timeout against a peer that accepts a connection and then never answers. A tiny deadline
+against the real server would be a race — on loopback a `PING` round trip can finish inside a
+millisecond — so the silent peer is what makes the timeout the only possible outcome.
 
 ### The named integration case
 
-Vitest flagged one test as slow enough to name in the output:
+Vitest flagged three tests as slow enough to name in the output:
 
 ```
-✓ the server survives hostile input > splits two coalesced requests arriving in one
-  TCP write into two responses  315ms
+✓ relaying a request > reports a client-side timeout as a 502 carrying the error code  1142ms
+✓ exchanges > throws a typed client error when nothing answers in time  1122ms
+✓ exchanges > does not count a request that never completed  1113ms
+✓ raw writes > keeps deliberately malformed bytes out of the sent decoder  1224ms
 ```
 
-This is the coalescing case from [protocol-examples.md §6](protocol-examples.md#6-coalescing-many-messages-one-write),
-running against a real socket.
+The first is from `http.test.ts`, the latter three from `relay.test.ts`. All four bind a silent
+peer that accepts and never answers, forcing the timeout to be the only possible outcome. A
+tiny deadline against the real server would be a race — on loopback a `PING` can finish inside
+a millisecond.
 
 ---
 
@@ -107,53 +122,62 @@ npx vitest run --coverage
 
 | Metric     |   Value |
 | ---------- | ------: |
-| Statements | 60.31 % |
-| Branches   | 82.29 % |
-| Functions  | 76.02 % |
-| Lines      | 60.31 % |
+| Statements | 70.41 % |
+| Branches   | 84.05 % |
+| Functions  | 81.17 % |
+| Lines      | 70.41 % |
 
 **The overall line figure is not the useful number, and it is worth saying why.** It
-averages across the React interface and the bridge, neither of which is broadly covered, so
-it understates coverage of the parts where correctness actually matters. The per-area table
-is the honest view.
+averages across the React interface, which is not broadly covered, so it understates coverage
+of the parts where correctness actually matters. The per-area table is the honest view.
 
 ### By area
 
 | Area                      | % Stmts | % Branch | % Funcs | % Lines |
 | ------------------------- | ------: | -------: | ------: | ------: |
-| `packages/protocol/src`   |   86.24 |    89.75 |   63.38 |   86.24 |
-| `packages/core/src`       |   82.72 |    84.43 |   77.41 |   82.72 |
-| `apps/server/src`         |   83.87 |    70.46 |   76.92 |   83.87 |
-| `apps/cli/src`            |   65.90 |    74.33 |   81.81 |   65.90 |
+| `packages/protocol/src`   |   87.57 |    90.41 |   66.19 |   87.57 |
+| `packages/core/src`       |   84.85 |    84.96 |   83.87 |   84.85 |
+| `apps/server/src`         |   83.87 |    70.86 |   76.92 |   83.87 |
+| `apps/cli/src`            |   76.22 |    78.16 |   81.70 |   76.22 |
+| `apps/bridge/src`         |   94.55 |    89.91 |     100 |   94.55 |
 | `apps/gui/src/lib`        |     100 |      100 |     100 |     100 |
 | `apps/gui/src/components` |   11.68 |    86.48 |   88.88 |   11.68 |
 | `apps/gui/src/hooks`      |       0 |      100 |     100 |       0 |
-| `apps/bridge/src`         |       0 |      100 |     100 |       0 |
+
+`apps/bridge/src` moved from 0 % to 94.55 % in this release, and `cli/repl.ts` from 0 % to
+97.26 %. Those were the two gaps named in the 0.1.0 results as the ones that would most
+improve the suite, because both contain real logic rather than presentation.
 
 ### The files that matter most
 
-| File                     | % Lines | Note                            |
-| ------------------------ | ------: | ------------------------------- |
-| `protocol/decoder.ts`    |   84.69 | the incremental framing decoder |
-| `protocol/encoder.ts`    |   93.27 |                                 |
-| `protocol/validate.ts`   |   93.47 |                                 |
-| `protocol/errors.ts`     |     100 |                                 |
-| `protocol/status.ts`     |   95.34 | the status registry             |
-| `protocol/operations.ts` |   93.58 | the operation registry          |
-| `protocol/types.ts`      |     100 |                                 |
-| `protocol/constants.ts`  |     100 |                                 |
-| `core/matching.ts`       | **100** | rule matching and ordering      |
-| `core/assertions.ts`     |   99.37 | expected-versus-actual          |
-| `core/session-store.ts`  |   96.28 |                                 |
-| `core/validation.ts`     |   92.12 |                                 |
-| `core/test-runner.ts`    |   88.17 |                                 |
-| `core/mock-endpoint.ts`  |   82.93 |                                 |
-| `server/handlers.ts`     |   90.90 | the 13 operation handlers       |
-| `server/server.ts`       |   78.57 |                                 |
-| `cli/dispatch.ts`        |     100 |                                 |
-| `cli/help.ts`            |     100 |                                 |
-| `cli/options.ts`         |   98.02 |                                 |
-| `cli/render.ts`          |   92.93 |                                 |
+| File                     | % Lines | Note                                   |
+| ------------------------ | ------: | -------------------------------------- |
+| `protocol/decoder.ts`    |   84.69 | the incremental framing decoder        |
+| `protocol/encoder.ts`    |   93.27 |                                        |
+| `protocol/validate.ts`   |   93.47 |                                        |
+| `protocol/errors.ts`     |     100 |                                        |
+| `protocol/status.ts`     |   95.34 | the status registry                    |
+| `protocol/operations.ts` |   93.58 | the operation registry                 |
+| `protocol/types.ts`      |     100 |                                        |
+| `protocol/constants.ts`  |     100 |                                        |
+| `core/matching.ts`       | **100** | rule matching and ordering             |
+| `core/assertions.ts`     |   99.37 | expected-versus-actual                 |
+| `core/session-store.ts`  |   96.28 |                                        |
+| `core/validation.ts`     |   92.12 |                                        |
+| `core/test-runner.ts`    |   88.17 |                                        |
+| `core/mock-endpoint.ts`  |   82.93 |                                        |
+| `core/client.ts`         |   79.44 |                                        |
+| `server/handlers.ts`     |   90.90 | the 13 operation handlers              |
+| `server/server.ts`       |   78.57 |                                        |
+| `cli/dispatch.ts`        |     100 |                                        |
+| `cli/help.ts`            |     100 |                                        |
+| `cli/options.ts`         |   98.02 |                                        |
+| `cli/repl.ts`            |   97.26 | interactive mode                       |
+| `cli/render.ts`          |   92.36 |                                        |
+| `bridge/events.ts`       |     100 | Server-Sent-Events fan-out             |
+| `bridge/options.ts`      |     100 |                                        |
+| `bridge/http.ts`         |   93.33 | the six `/bridge/*` routes             |
+| `bridge/relay.ts`        |   90.22 | owns the TCP socket the browser cannot |
 
 `matching.ts` at 100 % line coverage is the one to point at: deterministic rule ordering is
 what makes every other test in the suite reproducible, so it is the piece least tolerable to
@@ -163,21 +187,19 @@ leave partly exercised.
 
 These are recorded as gaps, not defended as acceptable.
 
-| Area                 |   Lines | Why it is uncovered                                                                                     |
-| -------------------- | ------: | ------------------------------------------------------------------------------------------------------- |
-| `apps/gui/src` hooks |     0 % | Bridge connection hook; not covered.                                                                    |
-| `apps/gui/src` most  |   ~12 % | Two component tests and one pure-logic test exist; the bulk of the interface remains manually verified. |
-| `apps/bridge/src`    |     0 % | No automated tests. Exercised manually only.                                                            |
-| `cli/repl.ts`        |     0 % | Interactive read-eval-print loop; not driven by the test suite.                                         |
-| `protocol/format.ts` | 13.55 % | Display formatting helpers, reached mainly through the interface.                                       |
-| `core/scenarios.ts`  |  7.14 % | Bundle **parsing** is covered via `validation.ts`; the file-loading paths are not.                      |
-| `cli/state.ts`       | 35.41 % | Persisted CLI session state; partly exercised.                                                          |
-| `core/logger.ts`     | 69.67 % | Output formatting branches.                                                                             |
+| Area                  |   Lines | Why it is uncovered                                                                                     |
+| --------------------- | ------: | ------------------------------------------------------------------------------------------------------- |
+| `apps/gui/src` hooks  |     0 % | Bridge connection hook; not covered.                                                                    |
+| `apps/gui/src` most   |   ~12 % | Two component tests and one pure-logic test exist; the bulk of the interface remains manually verified. |
+| `core/scenarios.ts`   |  7.14 % | Bundle **parsing** is covered via `validation.ts`; the file-loading paths are not.                      |
+| `protocol/format.ts`  | 44.06 % | Display formatting helpers, reached mainly through the interface.                                       |
+| `cli/state.ts`        | 45.83 % | Persisted CLI session state; partly exercised.                                                          |
+| `cli/commands.ts`     | 54.27 % | Command bodies; the routing that reaches them is fully covered.                                         |
+| `protocol/display.ts` | 60.81 % | Display helpers for the interface.                                                                      |
+| `core/logger.ts`      | 73.54 % | Output formatting branches.                                                                             |
 
-The two that would most improve the suite are `apps/bridge` and `cli/repl.ts`, because both
-contain real logic. The GUI gaps are recorded: two logic tests were added during the audit
-(form parsing and result rendering), proving that non-brittle component tests targeting
-protocol behavior rather than pixels are viable.
+The interface is now the largest remaining gap. The two that were named in 0.1.0 —
+`apps/bridge` and `cli/repl.ts` — are closed.
 
 ---
 
@@ -416,14 +438,12 @@ Stated plainly so the gaps are not mistaken for coverage.
 1. **The interface is only lightly covered.** `apps/gui` has two test files — the shared field
    parsers and the result panel — and nothing else. The remaining components and the bridge
    connection hook are verified by hand against the demo script.
-2. **No automated bridge tests.** `apps/bridge` is at 0 % despite containing real relay and
-   Server-Sent-Events logic. This is the most significant gap in the suite.
-3. **No cross-platform CI evidence in this document.** The recorded run is Windows only. The
+2. **No cross-platform CI evidence in this document.** The recorded run is Windows only. The
    CI workflow covers Linux; those results are not reproduced here.
-4. **The recorded run used Node v26.5.1**, above the 20/22/24 CI matrix, as noted at the top.
-5. **No load or soak testing.** Concurrency is verified with two simultaneous clients, not
+3. **The recorded run used Node v26.5.1**, above the 20/22/24 CI matrix, as noted at the top.
+4. **No load or soak testing.** Concurrency is verified with two simultaneous clients, not
    hundreds, and no test runs long enough to surface a slow resource leak.
-6. **No fuzzing.** Invalid inputs are the enumerated cases above, not randomly generated ones.
+5. **No fuzzing.** Invalid inputs are the enumerated cases above, not randomly generated ones.
    A fuzzer over the decoder would be the single highest-value addition to this suite.
 
 ---

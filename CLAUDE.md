@@ -4,7 +4,7 @@ Operational guidance for an AI coding agent working in this repository. Read the
 
 ## What this project is
 
-SocketLens TCP 0.1.0 — a local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.
+SocketLens TCP 0.1.1 — a local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.
 
 Its protocol, SLTP (SocketLens Testing Protocol) version 1.0, is a text-based, CRLF-delimited, length-framed application-layer protocol carried over a single raw TCP byte stream using Node's built-in `node:net`. It is not HTTP. Requests begin `SLTP/1.0 <OPERATION>`, responses begin `SLTP/1.0 <code> <PHRASE>`, `\r\n\r\n` ends the header block, and `Content-Length` gives the body length **in bytes**.
 

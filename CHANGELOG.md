@@ -4,6 +4,18 @@ All notable changes to SocketLens TCP are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-08-05
+
+### Added
+
+- Test coverage for `apps/bridge`: four new test files covering HTTP routes, the relay, event streams, and command-line parsing. Tests bind real TCP ports and use real `fetch` calls against real loopback listeners.
+- Test coverage for `apps/cli/repl.ts`: interactive mode lifecycle, tokenisation, prompt controls, inherited flags, and reconnection behaviour.
+
+### Fixed
+
+- Intermittent "bad port" test flake: when the OS assigned the bridge an ephemeral port from the Fetch standard's 82-port blocked list, `fetch` refused it immediately with "bad port" before any socket opened. The bridge now retries binding when this occurs, holding rejected bridges open so the OS cannot reassign the same blocked port.
+- REPL `raw on` / `raw off` controls were inert: the renderer's options field was readonly, so the controls updated the inherited flag list but never changed the renderer's actual output mode. The renderer now exposes a `setRaw()` method and the controls call it.
+
 ## [0.1.0] - 2026-08-04
 
 Initial release. SocketLens TCP is a local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.

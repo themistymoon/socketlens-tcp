@@ -879,7 +879,7 @@ npm run test:coverage  # coverage report into ./coverage
 Then, by hand:
 
 - Confirm the `version` field in the root `package.json` and in all six workspace
-  `package.json` files agrees with the tag. They are all `0.1.0` today and are expected to
+  `package.json` files agrees with the tag. They are all `0.1.1` today and are expected to
   move together.
 - Confirm the documents still match the code, in particular the two normative registries:
   `SLTP_OPERATION_REGISTRY` against [`docs/protocol-specification.md`](./protocol-specification.md) §11,

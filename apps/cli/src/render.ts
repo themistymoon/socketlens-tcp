@@ -41,7 +41,7 @@ export const stdoutWriter: Writer = (line) => process.stdout.write(`${line}\n`);
 /** A renderer bound to one output stream and palette. */
 export class Renderer {
   private readonly write: Writer;
-  private readonly options: RenderOptions;
+  private options: RenderOptions;
   private readonly palette: ReturnType<typeof createPalette>;
 
   constructor(write: Writer = stdoutWriter, options?: Partial<RenderOptions>) {
@@ -51,6 +51,23 @@ export class Renderer {
       colour: options?.colour ?? shouldUseColour(),
     };
     this.palette = createPalette(this.options.colour);
+  }
+
+  /**
+   * Turns raw byte output on or off.
+   *
+   * The interactive prompt holds one renderer for its whole session, so `raw on` has
+   * to reach the instance rather than the constructor. Colour is deliberately not
+   * settable: the palette is built once, which is why the prompt says a restart is
+   * needed to change it.
+   */
+  setRaw(raw: boolean): void {
+    this.options = { ...this.options, raw };
+  }
+
+  /** Whether exact bytes are currently being printed. */
+  get raw(): boolean {
+    return this.options.raw;
   }
 
   /** Prints a blank line. */

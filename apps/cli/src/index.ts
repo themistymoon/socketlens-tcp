@@ -26,7 +26,7 @@ export type { GlobalOptions, ParsedCommandLine } from './options.js';
 export type { CommandContext, CommandResult } from './commands.js';
 
 /** Version reported by `--version`. Kept in step with the workspace manifests. */
-export const CLI_VERSION = '0.1.0';
+export const CLI_VERSION = '0.1.1';
 
 /** Chooses the protocol log level implied by the global flags. */
 function logLevelFor(global: GlobalOptions): LogLevel {

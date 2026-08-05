@@ -55,7 +55,7 @@ Request-ID: req-1\r\n
 ```
 SLTP/1.0 200 OK\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: 2026-08-04T10:35:53.138Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 100\r\n
@@ -91,7 +91,7 @@ Content-Length: 17\r\n
 SLTP/1.0 201 SESSION CREATED\r\n
 Session-ID: ses-3\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: 2026-08-04T10:13:23.837Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 249\r\n
@@ -125,7 +125,7 @@ Content-Length: 213\r\n
 ```
 SLTP/1.0 212 RULE ADDED\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: ...\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: ...\r\n
@@ -275,7 +275,7 @@ SLTP/1.0 PING\r\n
 ```
 SLTP/1.0 400 BAD REQUEST\r\n
 Reason: missing-request-id\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: 2026-08-04T10:36:13.668Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 92\r\n
@@ -379,7 +379,7 @@ Content-Length: abc\r\n
 ```
 SLTP/1.0 400 BAD REQUEST\r\n
 Reason: invalid-content-length\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: 2026-08-04T10:37:09.048Z\r\n
 Connection: close\r\n
 Content-Type: application/json; charset=utf-8\r\n

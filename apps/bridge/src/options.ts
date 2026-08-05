@@ -37,7 +37,7 @@ export interface BridgeOptions {
 }
 
 /** Product string reported by `--version`, kept in step with the manifests. */
-export const BRIDGE_VERSION = '0.1.0';
+export const BRIDGE_VERSION = '0.1.1';
 
 /** Usage text, printed by `--help`. */
 export const USAGE = `socketlens-bridge ${BRIDGE_VERSION} — loopback relay for the SocketLens TCP interface

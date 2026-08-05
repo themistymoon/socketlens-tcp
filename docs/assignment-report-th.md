@@ -501,7 +501,7 @@ SLTP/1.0 <รหัสสถานะ> <ข้อความสถานะ>
 SLTP/1.0 201 SESSION CREATED\r\n
 Session-ID: ses-2\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.0\r\n
+Server: SocketLens-TCP/0.1.1\r\n
 Timestamp: 2026-08-04T08:16:42.838Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 249\r\n

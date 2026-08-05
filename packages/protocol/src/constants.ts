@@ -82,7 +82,7 @@ export const CONTENT_TYPE_JSON = 'application/json; charset=utf-8';
 export const CONTENT_TYPE_TEXT = 'text/plain; charset=utf-8';
 
 /** Value advertised in the `Server` response header. */
-export const SERVER_PRODUCT = 'SocketLens-TCP/0.1.0';
+export const SERVER_PRODUCT = 'SocketLens-TCP/0.1.1';
 
 /** Grammar for a `Request-ID` or `Session-ID` value. */
 export const IDENTIFIER_PATTERN = /^[A-Za-z0-9._:-]{1,64}$/;

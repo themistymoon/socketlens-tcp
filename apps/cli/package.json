@@ -1,6 +1,6 @@
 {
   "name": "@socketlens/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "SocketLens TCP command-line client: the primary SLTP client, fully functional without the graphical interface.",
   "license": "MIT",

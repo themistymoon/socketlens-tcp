@@ -68,7 +68,7 @@ npm run cli -- ping --raw
 [SERVER -> CLIENT] 2026-08-04T10:13:15.568Z conn=conn-1 request=req-1 status=200 phrase="OK" bytes=273
 SLTP/1.0 200 OK  (273 bytes, 2 ms)
   Request-ID: req-1
-  Server: SocketLens-TCP/0.1.0
+  Server: SocketLens-TCP/0.1.1
   Timestamp: 2026-08-04T10:13:15.567Z
   Content-Type: application/json; charset=utf-8
   Content-Length: 100

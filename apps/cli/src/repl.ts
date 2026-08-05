@@ -47,6 +47,10 @@ export async function runRepl(options: ReplOptions): Promise<number> {
   let exitCode = 0;
   let inherited = [...options.inherited];
 
+  // The inherited flags and the renderer are two views of the same setting, so they are
+  // aligned once at startup rather than left to drift apart.
+  if (inherited.includes('--raw')) renderer.setRaw(true);
+
   // Piped input closes the interface as soon as the last line is read, while the
   // loop below is still working through the queued lines. Prompting a closed
   // interface throws, so the state is tracked and prompting is skipped.
@@ -138,9 +142,14 @@ async function handleControl(
 
   switch (line) {
     case 'raw on':
-      context.renderer.note('Raw byte output enabled. Recreate the prompt to change colouring.');
+      // The renderer is held for the whole prompt session, so this has to reach the
+      // instance as well as the inherited flags: the flags are what a re-parsed
+      // command line carries, the instance is what actually prints the bytes.
+      context.renderer.setRaw(true);
+      context.renderer.note('Raw byte output enabled.');
       return [...flags, '--raw'];
     case 'raw off':
+      context.renderer.setRaw(false);
       context.renderer.note('Raw byte output disabled.');
       return flags;
     case 'verbose':
