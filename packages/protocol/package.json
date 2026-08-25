@@ -1,6 +1,6 @@
 {
   "name": "@socketlens/protocol",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "SLTP (SocketLens Testing Protocol) message types, encoder, incremental TCP stream decoder, and status-code registry.",
   "license": "MIT",

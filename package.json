@@ -1,6 +1,6 @@
 {
   "name": "socketlens-tcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "A local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.",
   "license": "MIT",
@@ -45,6 +45,8 @@
     "dev:bridge": "npm run build:ts && tsx apps/bridge/src/index.ts",
     "dev:gui": "node scripts/dev-gui.mjs",
     "examples": "npm run build:ts && tsx examples/run-all.ts",
+    "benchmark": "npm run build:ts && tsx benchmarks/run.ts",
+    "wireshark:demo": "npm run build:ts && node scripts/wireshark-demo.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

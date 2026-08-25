@@ -4,7 +4,7 @@
  *
  * These assert on what a viewer must be able to read off the screen during a
  * demonstration — the verdict, the numeric status code and its phrase, each assertion's
- * expected and actual values, and the observed TCP segment counts. They deliberately do
+ * expected and actual values, and the observed write and read counts. They deliberately do
  * not assert on class names, element structure, or layout, so restyling the panel cannot
  * break them. What is checked is the information, not its presentation.
  */
@@ -117,8 +117,8 @@ describe('ResultView', () => {
     expect(screen.getByText(/no response within 2000 ms/i)).toBeDefined();
   });
 
-  it('reports two framed responses from a single received segment', () => {
-    // This is the coalescing claim made visible: fewer segments than messages.
+  it('reports two framed responses from a single read', () => {
+    // This is the coalescing claim made visible: fewer reads than messages.
     const coalesced = passingResult({
       scenarioName: 'coalesced',
       receivedSegmentCount: 1,
@@ -127,7 +127,7 @@ describe('ResultView', () => {
 
     render(<ResultView result={coalesced} history={[]} onSelectResult={() => {}} />);
 
-    expect(screen.getByText(/1 segment\(s\).*2 framed response\(s\)/)).toBeDefined();
+    expect(screen.getByText(/1 read\(s\).*2 framed response\(s\)/)).toBeDefined();
   });
 
   it('lists earlier runs so a failed run stays reachable after a later pass', () => {

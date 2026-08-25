@@ -682,7 +682,7 @@ export async function commandResultList(context: CommandContext): Promise<Comman
   return 0;
 }
 
-/** `result show <id>` — one result in full, including its wire segments. */
+/** `result show <id>` — one result in full, including its writes and reads. */
 export async function commandResultShow(context: CommandContext): Promise<CommandResult> {
   const sessionId = await resolveSession(context);
   const id = context.parsed.positional[0] ?? stringFlag(context.parsed.flags, 'id');

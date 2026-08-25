@@ -42,12 +42,12 @@ TESTS
                                       ad-hoc scenario built from flags
   scenario show <file.json>           validate and describe a scenario file
   result list                         LIST_RESULTS
-  result show <resultId>              GET_RESULT, with assertions and TCP segments
+  result show <resultId>              GET_RESULT, with assertions and wire writes
   result export --out <file>          write every stored result to JSON
 
 REFERENCE
-  help operations                     print the SLTP operation registry
-  help status                         print the SLTP status registry
+  help operations                     print both SLTP registries, operations first
+  help status                         print both SLTP registries, operations first
 
 GLOBAL OPTIONS
   -h, --host <host>                   server host (default ${DEFAULT_HOST})
@@ -137,7 +137,7 @@ const COMMAND_HELP: Readonly<Record<string, string>> = {
   --body <text>          response body
   --priority <n>         higher wins (default 0)
   --delay <ms>           delay before the mock writes the response
-  --fragment <a,b,c>     write the response in TCP segments of these sizes
+  --fragment <a,b,c>     write the response in separate writes of these sizes
   --file <path>          read the whole rule from a JSON file
   --json-body <json>     read the whole rule from an inline JSON string`,
 
@@ -164,7 +164,7 @@ const COMMAND_HELP: Readonly<Record<string, string>> = {
 
   Executes one or more scenarios. The server opens a real TCP connection to the
   session's mock endpoint, writes the request as the scenario specifies, and records
-  every TCP segment, so fragmentation and coalescing are directly observable.
+  every write and read, so fragmentation and coalescing are directly observable.
 
   <file.json>            scenario bundle, or a single bare scenario object
   --file <path>          same as the positional argument
@@ -177,7 +177,7 @@ const COMMAND_HELP: Readonly<Record<string, string>> = {
   --name <name>          scenario name
   --body <text>          request body
   --header "N: v"        request header
-  --fragment <a,b,c>     write the request in TCP segments of these sizes
+  --fragment <a,b,c>     write the request in separate writes of these sizes
   --delay <ms>           delay between fragments
   --timeout <ms>         scenario timeout
   --expect-status <code> assert the response status code
@@ -195,8 +195,8 @@ const COMMAND_HELP: Readonly<Record<string, string>> = {
 
   'result show': `socketlens result show <resultId>
 
-  Shows one result: expected versus actual for each assertion, the TCP segments
-  observed, and — with --raw — the exact bytes sent and received.
+  Shows one result: expected versus actual for each assertion, the writes and
+  reads observed, and — with --raw — the exact bytes sent and received.
 
   Exits non-zero when the result is a failure.`,
 

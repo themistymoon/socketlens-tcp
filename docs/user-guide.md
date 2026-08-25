@@ -1,6 +1,6 @@
 # SocketLens TCP — User Guide
 
-Version 0.1.0. This guide is for someone **using** SocketLens TCP. It covers installing and
+Version 0.1.2. This guide is for someone **using** SocketLens TCP. It covers installing and
 building, running the server, driving it from the command line, opening the graphical
 interface, and working through the six demonstrations the tool exists to make visible.
 
@@ -147,20 +147,20 @@ These are the commands the CLI documents in its own `--help`.
 
 **Tests**
 
-| Command                      | What it does                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------- |
-| `run [<file.json>]`          | `RUN_TEST` for each scenario in a bundle, or an ad-hoc scenario built from flags            |
-| `scenario show <file.json>`  | Validate and describe a scenario file without running it. Every problem is reported at once |
-| `result list`                | `LIST_RESULTS`, with pass and fail counts                                                   |
-| `result show <resultId>`     | `GET_RESULT`, with assertions and TCP segments. Exits non-zero when the result is a failure |
-| `result export --out <file>` | Write every stored result to JSON                                                           |
+| Command                      | What it does                                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `run [<file.json>]`          | `RUN_TEST` for each scenario in a bundle, or an ad-hoc scenario built from flags                         |
+| `scenario show <file.json>`  | Validate and describe a scenario file without running it. Every problem is reported at once              |
+| `result list`                | `LIST_RESULTS`, with pass and fail counts                                                                |
+| `result show <resultId>`     | `GET_RESULT`, with assertions and the wire writes and reads. Exits non-zero when the result is a failure |
+| `result export --out <file>` | Write every stored result to JSON                                                                        |
 
 **Reference and interactive**
 
 | Command           | What it does                                                                |
 | ----------------- | --------------------------------------------------------------------------- |
-| `help operations` | Print the SLTP operation registry                                           |
-| `help status`     | Print the SLTP status registry                                              |
+| `help operations` | Print both SLTP registries, operations then status codes                    |
+| `help status`     | The same output; one function prints both registries                        |
 | `repl`            | Interactive mode; one TCP connection is opened and reused for every command |
 
 ### 3.2 Global options
@@ -379,20 +379,20 @@ contains multibyte UTF-8, which is exactly why `Content-Length` counts bytes."_
 
 Expected versus actual for the most recent run. A **PASS** or **FAIL** badge, then:
 
-| Field        | Meaning                                                                |
-| ------------ | ---------------------------------------------------------------------- |
-| Outcome      | `passed`, `failed`, `timeout`, or `error`, with a one-line explanation |
-| Duration     | Wall-clock time of the exchange                                        |
-| Writes out   | Number of `socket.write()` calls, and the total bytes they carried     |
-| Segments in  | Number of inbound TCP segments **→** number of framed responses        |
-| Matched rule | Which rule produced the response                                       |
-| Status       | The response's code and phrase                                         |
+| Field        | Meaning                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| Outcome      | `passed`, `failed`, `timeout`, or `error`, with a one-line explanation   |
+| Duration     | Wall-clock time of the exchange                                          |
+| Writes out   | Number of `socket.write()` calls, and the total bytes they carried       |
+| Reads in     | Number of inbound reads (`data` events) **→** number of framed responses |
+| Matched rule | Which rule produced the response                                         |
+| Status       | The response's code and phrase                                           |
 
 Then an **assertions table** — field, expected, actual, one row per assertion, marked ✓ or
-✗ — and a **TCP segments** list showing each individual write and read with its offset in
-milliseconds and its bytes.
+✗ — and a **wire writes and reads** list showing each individual write and read with its
+offset in milliseconds and its bytes.
 
-The segments list is the part to point at during a demonstration. Message boundaries do not
+That list is the part to point at during a demonstration. Message boundaries do not
 line up with segment boundaries, and this is where you can see it.
 
 Earlier runs in the session are listed below and can be reloaded.
@@ -509,9 +509,9 @@ In the interface: set **Transmission → coalesced**, fill in the second operati
 and run.
 
 **What to look for.** The result panel reports **1 write** under "Writes out" and, under
-"Segments in", _N_ segment(s) **→ 2** framed response(s). The timeline shows **two** inbound
+"Reads in", _N_ read(s) **→ 2** framed response(s). The timeline shows **two** inbound
 messages. The CLI result view calls this out explicitly, noting how many SLTP responses were
-framed from how many TCP segments.
+framed from how many reads.
 
 **What it proves about TCP.** This is the exact inverse of §6.3, and together they are the
 whole argument. One write produced two messages; seven writes produced one. **Nothing at the

@@ -1,6 +1,6 @@
 # SocketLens TCP — Architecture
 
-Version 0.1.0. This document describes how SocketLens TCP is put together and why. It is
+Version 0.1.2. This document describes how SocketLens TCP is put together and why. It is
 the companion to [`docs/requirements.md`](./requirements.md); requirement identifiers such
 as FR-4 or NFR-2 refer to that document.
 
@@ -207,7 +207,7 @@ a wrong answer:
   status the server never emits, and would let documentation drift from behaviour (NFR-28).
 - **The test suite exercises one implementation deeply** rather than three shallowly. The
   decoder test file alone covers complete messages, single messages split across segments
-  down to one byte at a time, several messages arriving in one segment, multi-byte UTF-8
+  down to one byte at a time, several messages arriving in one read, multi-byte UTF-8
   characters split across chunks, and more than twenty distinct invalid-framing cases. That
   depth is affordable exactly once.
 

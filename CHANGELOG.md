@@ -4,6 +4,25 @@ All notable changes to SocketLens TCP are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-08-25
+
+No change to SLTP/1.0. The protocol grammar, the operation registry, the status registry, and the framing rules are byte-for-byte identical to 0.1.1. This release adds evidence that the protocol behaves as specified, and corrects language that conflated three distinct things: application writes, TCP segments, and application messages.
+
+### Added
+
+- A benchmark suite in `benchmarks/`, run with `npm run benchmark`, comparing SLTP against a `node:http` server implemented the same way on the same loopback host. It measures with `process.hrtime.bigint()`, warms both protocols symmetrically before measuring, rotates cell ordering run-major so just-in-time compilation cannot systematically favour whichever protocol is measured first, reports medians rather than best-of-N, and establishes significance with a paired sign test rather than an eyeballed spread.
+- `docs/evaluation.md`, which states which requirement each part of the implementation satisfies and how that is verified, and reports the measured performance result honestly: SLTP is **slower** than the comparably-implemented HTTP/1.1 baseline, by a median factor of 1.21× to 1.82× across the measured operations, losing 39 of 40 paired rounds. The cause is per-message validation cost, not the framing strategy.
+- `docs/wireshark-capture.md`, a packet-capture procedure that makes SLTP framing observable with a tool that has no knowledge of the protocol, with each scenario mapped to the single SLTP design decision it demonstrates. Wireshark and Npcap remain optional; neither is a dependency of this project.
+- `scripts/wireshark-demo.mjs`, run with `npm run wireshark:demo`, which drives one named traffic scenario at a time and prints the local port and the ready-made Wireshark display filter for it.
+- `benchmark` and `wireshark:demo` npm scripts, both of which build the TypeScript sources first, because `tsx` resolves workspace imports through `dist/` and would otherwise run a stale build.
+
+### Changed
+
+- Terminology throughout the CLI, the interface, and the core loggers now distinguishes application writes from TCP segments from application messages. What was labelled "TCP segments" is now "wire writes and reads", "sent segments" is now "writes out", and "received segments" is now "reads in". The tool observes `socket.write()` calls and `data` events; it does not and cannot observe TCP segment boundaries, and the previous labels claimed otherwise. The `WireSegment`, `sentSegmentCount`, and `receivedSegmentCount` field names are retained for wire compatibility and documented for what they actually count.
+- The coursework material in `docs/` now presents SLTP as the deliverable and the server, CLI, bridge, interface, and test suite as the harness that demonstrates it.
+- `README.md` trimmed from 491 to 347 lines.
+- `tsconfig.tests.json` now type-checks `benchmarks/`, because a silent type error there would corrupt a reported number rather than throw.
+
 ## [0.1.1] - 2026-08-05
 
 ### Added

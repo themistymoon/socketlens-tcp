@@ -1,6 +1,6 @@
 # SocketLens TCP — Test Plan
 
-Version 0.1.0. This document states **what is tested, why, and how to run it**. It is a
+Version 0.1.2. This document states **what is tested, why, and how to run it**. It is a
 plan, not a report: it records intent and coverage obligations. Recorded outcomes from an
 actual run live in `docs/test-results.md`, which is generated separately from real output
 and is not part of this document.
@@ -213,8 +213,8 @@ those marked with a second location are additionally exercised over a real socke
 | Whole message delivered one byte at a time                | No amount of fragmentation may change the framed result                                                                            | FR-3         |
 
 Also covered at the server-integration level (`scenarios.test.ts`) with genuine writes: a
-request written as several TCP segments, a response the _mock endpoint_ wrote in fragments,
-and a body containing multibyte UTF-8 split across segments.
+request written as several separate writes, a response the _mock endpoint_ wrote in
+fragments, and a body containing multibyte UTF-8 split across writes.
 
 ### 3.2 Splitting — several messages, one chunk
 
@@ -374,19 +374,19 @@ Every case below asserts both the correct answer _and_ that the server keeps ser
 
 ## 5. Client behaviour
 
-| Case                                                                            | Level              | Intent                                                                                       | Requirements |
-| ------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------- | ------------ |
-| Defaults, environment fallback, flag precedence                                 | CLI unit           | `--port` beats `SOCKETLENS_PORT`; an unusable environment value is ignored rather than fatal | FR-62        |
-| Unknown flag rejected with a suggestion                                         | CLI unit           | A typo must not become a silently different command                                          | FR-63        |
-| Longest command path wins                                                       | CLI unit           | `session create` must beat `session`                                                         | FR-59        |
-| `--` stops flag parsing                                                         | CLI unit           | A raw payload may begin with a dash                                                          | FR-60        |
-| Non-2xx rendered as a result, not an error                                      | CLI unit           | Only transport failures, timeouts and framing faults are client errors                       | FR-64        |
-| Raw byte view in both directions                                                | CLI unit           | The exact bytes, with CRLF made visible                                                      | FR-61        |
-| UTF-8 byte counts, not character counts                                         | CLI unit           | The renderer must not repeat the mistake the protocol avoids                                 | FR-61, FR-5  |
-| Colour disabled produces no escape sequences                                    | CLI unit           | Output must be usable when piped                                                             | NFR-29       |
-| Several responses framed from fewer TCP segments, called out in the result view | CLI unit           | The central claim must be visible in the CLI, not only in the interface                      | FR-50, FR-61 |
-| Multiple simultaneous clients                                                   | Server integration | See §4.6                                                                                     | FR-19        |
-| Client disconnect                                                               | Server integration | See §4.5                                                                                     | FR-21, NFR-7 |
+| Case                                                                     | Level              | Intent                                                                                       | Requirements |
+| ------------------------------------------------------------------------ | ------------------ | -------------------------------------------------------------------------------------------- | ------------ |
+| Defaults, environment fallback, flag precedence                          | CLI unit           | `--port` beats `SOCKETLENS_PORT`; an unusable environment value is ignored rather than fatal | FR-62        |
+| Unknown flag rejected with a suggestion                                  | CLI unit           | A typo must not become a silently different command                                          | FR-63        |
+| Longest command path wins                                                | CLI unit           | `session create` must beat `session`                                                         | FR-59        |
+| `--` stops flag parsing                                                  | CLI unit           | A raw payload may begin with a dash                                                          | FR-60        |
+| Non-2xx rendered as a result, not an error                               | CLI unit           | Only transport failures, timeouts and framing faults are client errors                       | FR-64        |
+| Raw byte view in both directions                                         | CLI unit           | The exact bytes, with CRLF made visible                                                      | FR-61        |
+| UTF-8 byte counts, not character counts                                  | CLI unit           | The renderer must not repeat the mistake the protocol avoids                                 | FR-61, FR-5  |
+| Colour disabled produces no escape sequences                             | CLI unit           | Output must be usable when piped                                                             | NFR-29       |
+| Several responses framed from fewer reads, called out in the result view | CLI unit           | The central claim must be visible in the CLI, not only in the interface                      | FR-50, FR-61 |
+| Multiple simultaneous clients                                            | Server integration | See §4.6                                                                                     | FR-19        |
+| Client disconnect                                                        | Server integration | See §4.5                                                                                     | FR-21, NFR-7 |
 
 The bridge and the graphical client are exercised through the shared core and protocol
 packages, which they consume without re-implementing (NFR-2, FR-73).

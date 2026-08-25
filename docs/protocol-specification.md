@@ -1,6 +1,6 @@
 # SLTP/1.0 — Protocol Specification
 
-**SocketLens Testing Protocol, version 1.0.** Specification version 0.1.0.
+**SocketLens Testing Protocol, version 1.0.** Specification version 0.1.2.
 
 This document is the normative wire format for SLTP/1.0 as implemented by
 `packages/protocol`. It satisfies FR-1 to FR-17 of
@@ -418,7 +418,7 @@ other purpose.
 | `Matched-Rule-ID` | response          | repeatable   | Identifier of the mock rule that produced this response, or of the rule a mutation affected.                                                                                                                                                                                    |
 | `Result-ID`       | response          | repeatable   | Identifier of a stored test result.                                                                                                                                                                                                                                             |
 | `Reason`          | response          | repeatable   | Machine-readable reason code from the taxonomy in §16, accompanying an error status.                                                                                                                                                                                            |
-| `Server`          | response          | repeatable   | Product token of the responding server, e.g. `SocketLens-TCP/0.1.1`.                                                                                                                                                                                                            |
+| `Server`          | response          | repeatable   | Product token of the responding server, e.g. `SocketLens-TCP/0.1.2`.                                                                                                                                                                                                            |
 | `Retry-After`     | response          | repeatable   | Milliseconds to wait before retrying, sent with `429 TOO MANY REQUESTS`. Milliseconds, not seconds.                                                                                                                                                                             |
 
 - **R-9.17** Extension fields MAY be used freely. A receiver MUST ignore a field it does not
@@ -946,7 +946,7 @@ A recoverable-fault response. The body below is 114 octets:
 ```
 SLTP/1.0 400 BAD REQUEST
 Request-ID: req-6
-Server: SocketLens-TCP/0.1.1
+Server: SocketLens-TCP/0.1.2
 Reason: missing-session-id
 Content-Type: application/json; charset=utf-8
 Content-Length: 114

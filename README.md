@@ -9,15 +9,21 @@ application-layer protocols over raw TCP streams.**
 
 TCP gives you a reliable, ordered stream of bytes and nothing else — it does not tell you
 where one application message ends and the next begins. Getting that boundary wrong produces
-bugs that surface only under load, on a slow link, or when two messages leave in the same
-packet. SocketLens TCP makes those cases reproducible on demand: stand up a mock endpoint,
-write scenarios that deliberately fragment or coalesce messages, run them, and read back the
-exact bytes that crossed the wire in both directions.
+bugs that surface only under load, on a slow link, or when two messages end up in the same
+TCP segment. SocketLens TCP makes those cases reproducible on demand: stand up a mock
+endpoint, write scenarios that deliberately fragment or coalesce messages, run them, and read
+back the exact bytes that crossed the wire in both directions.
 
 It implements its own protocol, **SLTP** (SocketLens Testing Protocol), over a raw TCP socket
 using Node's built-in `node:net`. SLTP is not HTTP — messages are text-based, CRLF-delimited,
 and length-framed, parsed by an incremental decoder in this repository. No HTTP, WebSocket, or
 RPC framework appears anywhere in the protocol path.
+
+**The protocol is the artefact.** SLTP's grammar, framing strategy, correlation mechanism, and
+error semantics are what was designed here; the control server, CLI, interface, bridge, and
+test suite exist to demonstrate that the protocol works and to make its behaviour observable.
+Read [`docs/protocol-specification.md`](docs/protocol-specification.md) first if you only read
+one document.
 
 ---
 
@@ -53,7 +59,7 @@ single reused TCP connection, which is what makes `Request-ID` correlation visib
 The two commands worth running first:
 
 ```bash
-# one message, written as several TCP segments
+# one message, written as several separate socket writes
 npm run cli -- run --operation PING --fragment 12,8,40 --raw
 
 # how the server answers a message whose framing information is unusable
@@ -80,11 +86,13 @@ Windows. Loopback only — nothing binds a routable interface.
 - **A specified protocol, not an improvised one.** SLTP/1.0 has a start line, canonicalised
   headers, a `\r\n\r\n` delimiter, an explicit `Content-Length`, and documented operation and
   status registries.
-- **Framing you can observe.** Scenarios write one message as many TCP writes, or many
-  messages as one write. Both are recorded segment by segment in the stored result.
+- **Framing you can observe.** Scenarios write one message across many `socket.write()`
+  calls, or many messages in one write. Every write and every read is recorded
+  individually in the stored result.
 - **A real mock endpoint per session.** Each session owns an ephemeral TCP listener on an
-  OS-assigned port, so fragmentation and coalescing are genuine rather than simulated
-  in-process.
+  OS-assigned port, so the writes cross a real kernel TCP stack instead of an in-process
+  double. The scenario decides the write boundaries; the operating system decides the
+  segment boundaries.
 - **Failure modes as first-class features.** Timeouts, truncation mid-body, malformed
   `Content-Length`, and unmatched operations all have defined, documented outcomes.
 - **Three clients, one protocol.** A CLI that speaks SLTP over raw TCP and is fully usable
@@ -125,7 +133,7 @@ it:
 ```
 SLTP/1.0 200 OK
 Request-ID: req-1
-Server: SocketLens-TCP/0.1.1
+Server: SocketLens-TCP/0.1.2
 Timestamp: 2026-08-04T09:15:22.418Z
 Content-Type: application/json; charset=utf-8
 Content-Length: 125
@@ -225,6 +233,56 @@ than an in-process call, the behaviour it records is genuine.
 
 ---
 
+## Evaluation and measured performance
+
+The distinguishing strength of this project is not speed. It is that the framing layer is
+observable and its failure modes are reproducible on demand. The benchmark below is not the
+headline — it exists to substantiate one design trade-off honestly.
+
+That is worth stating plainly because the benchmark says so. Measured on loopback with a
+single persistent connection and one request in flight — Windows, Node v26.5.1, AMD Ryzen 7
+7840HS, 2000 round trips after 500 warm-up, **medians across 10 runs**:
+
+| Payload | SLTP/1.0 (`node:net`) | HTTP/1.1 minimal (`node:net`) | HTTP/1.1 (`node:http`) |
+| ------- | --------------------- | ----------------------------- | ---------------------- |
+| empty   | 27,458 req/s          | **33,134 req/s**              | 12,387 req/s           |
+| 128 B   | 23,501 req/s          | **30,221 req/s**              | 10,681 req/s           |
+| 16 KiB  | 6,565 req/s           | **11,980 req/s**              | 6,581 req/s            |
+
+**SLTP is slower than HTTP/1.1**, by a median 1.21× to 1.82× against an HTTP reader written in
+the same minimal style — it lost 39 of 40 paired rounds, significant at every payload size.
+Both benchmark implementations use comparable framing — a CRLF-delimited header block plus an
+explicit `Content-Length` — so the framing strategy does not explain the gap. (That is a
+statement about the two implementations measured, not a claim that the protocols are
+equivalent; they differ in semantics, routing, and body transfer.) What explains it is that
+the SLTP decoder validates every header name and value against a grammar, rejects duplicate
+single-valued headers, enforces four size limits, and checks the operation registry. A tool
+for diagnosing framing bugs has to reject an ambiguous message rather than guess at it, and
+that is the price.
+
+Against Node's general-purpose `node:http` stack the purpose-built implementation is a median
+1.83×–2.22× faster at payloads up to 1 KiB, and at 16 KiB there is **no consistent winner**
+(4 of 10 rounds, p = 0.754). Where the win exists it measures a library, not a protocol, and
+it must not be read as SLTP being faster than HTTP/1.1 in general — the like-for-like
+comparison above shows the opposite.
+
+Worst min-max spread was 53.9%, so the conclusion rests on a paired sign test over rounds
+rather than on the size of the gap. Loopback numbers do not predict LAN or WAN behaviour, and
+byte counts are application bytes excluding Ethernet, IP, and TCP headers.
+
+```bash
+npm run benchmark -- --runs 10  # reproduce; 10 runs recommended
+npm run benchmark               # quicker, 6 runs (the default)
+npm run wireshark:demo          # labelled traffic for a packet capture
+```
+
+Full claim-by-claim evaluation, including what HTTP/1.1 does better and the trade-offs
+accepted: [`docs/evaluation.md`](docs/evaluation.md). Methodology and caveats:
+[`benchmarks/README.md`](benchmarks/README.md). Capture procedure:
+[`docs/wireshark-capture.md`](docs/wireshark-capture.md).
+
+---
+
 ## Repository layout
 
 | Path                                      | Contents                                                                                                                                                                 |
@@ -235,8 +293,9 @@ than an in-process call, the behaviour it records is genuine.
 | [`apps/cli`](apps/cli/)                   | The command-line client. Speaks SLTP over raw TCP directly; includes a REPL.                                                                                             |
 | [`apps/bridge`](apps/bridge/)             | Loopback HTTP and SSE relay that owns a TCP socket on behalf of the browser.                                                                                             |
 | [`apps/gui`](apps/gui/)                   | React interface for sessions, rules, scenarios, and message inspection.                                                                                                  |
-| [`docs`](docs/)                           | Requirements, architecture, protocol specification, status codes, test plan and results, guides, and the Thai-language report material.                                  |
+| [`docs`](docs/)                           | Requirements, architecture, protocol specification, status codes, test plan and results, evaluation, packet capture, guides, and the Thai-language report material.      |
 | [`examples`](examples/)                   | Eleven runnable scenario bundles plus the runner that checks them.                                                                                                       |
+| [`benchmarks`](benchmarks/)               | SLTP versus HTTP/1.1 measurement suite, with its methodology and recorded results.                                                                                       |
 | [`tests`](tests/)                         | Vitest suites: protocol, core, CLI, server integration, and interface logic tests.                                                                                       |
 
 ## Documentation
@@ -250,6 +309,8 @@ than an in-process call, the behaviour it records is genuine.
 | [`docs/status-codes.md`](docs/status-codes.md)                         | The full status registry with phrases, categories, meanings, and permitted contexts.                             |
 | [`docs/test-plan.md`](docs/test-plan.md)                               | Test cases mapped to requirement identifiers.                                                                    |
 | [`docs/test-results.md`](docs/test-results.md)                         | Recorded outcomes of executing the test plan.                                                                    |
+| [`docs/evaluation.md`](docs/evaluation.md)                             | Claim-by-claim evaluation, measured benchmark results, and a fair HTTP/1.1 comparison.                           |
+| [`docs/wireshark-capture.md`](docs/wireshark-capture.md)               | Capturing SLTP on loopback, Windows first, and what a capture does and does not prove.                           |
 | [`docs/user-guide.md`](docs/user-guide.md)                             | Task-oriented guide to the CLI and the graphical interface.                                                      |
 | [`docs/developer-guide.md`](docs/developer-guide.md)                   | Building, testing, and extending the codebase, including the full script reference.                              |
 | [`docs/assignment-report-th.md`](docs/assignment-report-th.md)         | รายงานโครงงาน — the project report, in Thai.                                                                     |
@@ -264,14 +325,16 @@ than an in-process call, the behaviour it records is genuine.
 
 ## Development
 
-| Script             | What it does                                                                             |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run verify`   | `format:check`, `lint`, `typecheck`, `test`, `build`. The gate to run before committing. |
-| `npm run build`    | Compiles every TypeScript project reference, then builds the interface.                  |
-| `npm test`         | Runs the Vitest suites once.                                                             |
-| `npm run examples` | Runs all eleven examples and checks each documented outcome.                             |
-| `npm run dev`      | Starts the server, the bridge, and the Vite dev server together.                         |
-| `npm run cli`      | Runs the compiled CLI. Pass arguments after `--`.                                        |
+| Script                   | What it does                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `npm run verify`         | `format:check`, `lint`, `typecheck`, `test`, `build`. The gate to run before committing. |
+| `npm run build`          | Compiles every TypeScript project reference, then builds the interface.                  |
+| `npm test`               | Runs the Vitest suites once.                                                             |
+| `npm run examples`       | Runs all eleven examples and checks each documented outcome.                             |
+| `npm run benchmark`      | Measures SLTP against HTTP/1.1. Not part of `verify`.                                    |
+| `npm run wireshark:demo` | Generates labelled loopback traffic for a packet capture.                                |
+| `npm run dev`            | Starts the server, the bridge, and the Vite dev server together.                         |
+| `npm run cli`            | Runs the compiled CLI. Pass arguments after `--`.                                        |
 
 [`docs/developer-guide.md`](docs/developer-guide.md) documents every script, including the
 `dev:*`, `start:*`, `lint:fix`, `format`, `clean`, and coverage variants.

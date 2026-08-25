@@ -4,7 +4,7 @@ Operational guidance for an AI coding agent working in this repository. Read the
 
 ## What this project is
 
-SocketLens TCP 0.1.1 — a local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.
+SocketLens TCP 0.1.2 — a local developer tool for designing, mocking, testing, and debugging custom application-layer protocols over raw TCP streams.
 
 Its protocol, SLTP (SocketLens Testing Protocol) version 1.0, is a text-based, CRLF-delimited, length-framed application-layer protocol carried over a single raw TCP byte stream using Node's built-in `node:net`. It is not HTTP. Requests begin `SLTP/1.0 <OPERATION>`, responses begin `SLTP/1.0 <code> <PHRASE>`, `\r\n\r\n` ends the header block, and `Content-Length` gives the body length **in bytes**.
 
@@ -21,7 +21,7 @@ An npm workspaces monorepo, six workspaces, built as one TypeScript composite pr
 - `apps/gui` — React 19 interface, built with Vite.
 - `apps/bridge` — a loopback `node:http` server that owns a TCP connection to the control server and relays for the browser. Six routes under `/bridge/*`, no web framework.
 
-Tests are in `tests/` (`protocol`, `core`, `server`, `cli`, with shared fixtures and a harness in `tests/helpers`). Eleven runnable examples are in `examples/`. Reference documentation is in `docs/`.
+Tests are in `tests/` (`protocol`, `core`, `client`, `server`, `cli`, `bridge`, `gui`, with shared fixtures and a harness in `tests/helpers`). Eleven runnable examples are in `examples/`. Reference documentation is in `docs/`. `benchmarks/` measures SLTP against HTTP/1.1 and is not part of `verify`.
 
 The registries in `packages/protocol/src/operations.ts` and `status.ts` are the normative source for what SLTP accepts and returns. Consult them before adding or changing an operation or a status code.
 
@@ -100,7 +100,7 @@ Documentation and implementation are expected to agree at every commit.
 
 - **Every protocol example in any document must be valid per the current implementation** — a registered operation, a registered status code and its exact canonical phrase, real header names, CRLF line endings, and a `Content-Length` that is the correct **byte** count. Bytes and characters differ for any non-ASCII body.
 - `npm run examples` enforces this for `examples/`: the runner exits non-zero when an example's README disagrees with the code. If you change protocol behaviour, update the affected example README in the same change.
-- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. `docs/status-codes.md` documents the status registry in full but is **maintained by hand**, so nothing mechanically stops the two from drifting — change the registry and you must update that document in the same change. Generating it is a roadmap item. `docs/` holds thirteen documents; see the table in `README.md`.
+- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. `docs/status-codes.md` documents the status registry in full but is **maintained by hand**, so nothing mechanically stops the two from drifting — change the registry and you must update that document in the same change. Generating it is a roadmap item. `docs/` holds fifteen documents; see the table in `README.md`.
 - A protocol change that leaves a stale example anywhere is an incomplete change.
 
 ## Working notes

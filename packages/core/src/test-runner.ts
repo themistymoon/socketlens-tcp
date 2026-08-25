@@ -154,8 +154,8 @@ export async function runScenario(
     scenario.name,
     result.passed,
     `outcome=${result.outcome} ${result.durationMs}ms ` +
-      `sent=${exchange.sent.length}B in ${result.sentSegmentCount} segment(s) ` +
-      `received=${exchange.received.length}B in ${result.receivedSegmentCount} segment(s) ` +
+      `sent=${exchange.sent.length}B in ${result.sentSegmentCount} write(s) ` +
+      `received=${exchange.received.length}B in ${result.receivedSegmentCount} read(s) ` +
       `responses=${result.responseCount}` +
       (result.response ? ` status=${result.response.statusCode}` : ''),
   );

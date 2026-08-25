@@ -214,13 +214,18 @@ export interface AssertionResult {
 /** Why a scenario finished. */
 export type TestOutcome = 'passed' | 'failed' | 'timeout' | 'error';
 
-/** One observed TCP write or read during a scenario, for the fragmentation view. */
+/**
+ * One observed application write or read during a scenario, for the fragmentation view.
+ *
+ * This is an application-level event, not a TCP segment. The operating system decides
+ * how the bytes of a write are carried, and the socket API never reveals it.
+ */
 export interface WireSegment {
   readonly direction: 'sent' | 'received';
   /** Milliseconds since the scenario started. */
   readonly atMs: number;
   readonly bytes: number;
-  /** The segment's bytes, decoded as UTF-8 for display. */
+  /** The bytes of this write or read, decoded as UTF-8 for display. */
   readonly data: string;
 }
 
@@ -252,17 +257,27 @@ export interface TestResult {
   readonly matchedRuleId?: string;
   /** Human-readable explanation of a timeout, disconnect, or protocol error. */
   readonly error?: string;
-  /** Individual TCP writes and reads, proving fragmentation actually occurred. */
+  /** Individual writes and reads, proving fragmentation actually occurred. */
   readonly segments: readonly WireSegment[];
   /**
    * Number of separate `socket.write()` calls the request was split across. A
    * fragmented scenario that reports 1 here did not actually fragment anything.
+   *
+   * Named `segment` for wire compatibility, but this counts **application writes**.
+   * How many TCP segments the operating system produced from them is its decision,
+   * is not observable from the socket API, and may be a different number.
    */
   readonly sentSegmentCount: number;
-  /** Number of separate TCP segments the response arrived in. */
+  /**
+   * Number of separate reads the response arrived in — that is, `data` events.
+   *
+   * A `data` event is not a TCP segment: the kernel may deliver several segments in
+   * one event, or one segment across two. What this proves is only that the receiver
+   * could not rely on any single read holding a whole message.
+   */
   readonly receivedSegmentCount: number;
   /**
-   * How many complete SLTP responses were framed from those segments. Two responses
+   * How many complete SLTP responses were framed from those reads. Two responses
    * arriving from one coalesced write is the observable proof that TCP does not
    * preserve message boundaries.
    */

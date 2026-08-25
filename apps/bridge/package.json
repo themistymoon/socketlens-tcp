@@ -1,6 +1,6 @@
 {
   "name": "@socketlens/bridge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Loopback bridge that lets the browser-based interface drive a raw TCP SLTP connection. Serves the built React interface and relays commands; it never reimplements SLTP.",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@socketlens/core": "0.1.1",
-    "@socketlens/protocol": "0.1.1"
+    "@socketlens/core": "0.1.2",
+    "@socketlens/protocol": "0.1.2"
   }
 }

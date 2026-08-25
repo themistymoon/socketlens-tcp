@@ -1,6 +1,6 @@
 # SocketLens TCP — Requirements
 
-Version 0.1.0. This document defines what SocketLens TCP does, what it deliberately does
+Version 0.1.2. This document defines what SocketLens TCP does, what it deliberately does
 not do, and the quality constraints it holds itself to. Every requirement carries a stable
 identifier so that [`docs/architecture.md`](./architecture.md),
 [`docs/protocol-specification.md`](./protocol-specification.md) and

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-SocketLens TCP is at version 0.1.1. Only the current release line receives security fixes.
+SocketLens TCP is at version 0.1.2. Only the current release line receives security fixes.
 
 | Version | Supported       |
 | ------- | --------------- |

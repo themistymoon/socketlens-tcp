@@ -308,7 +308,7 @@ async function respond(
   }
   if (chunks.length > 1) {
     context.logger.info(
-      `conn=${connectionId} response written as ${chunks.length} TCP segment(s): ` +
+      `conn=${connectionId} response written in ${chunks.length} separate write(s): ` +
         `${chunks.map((c) => c.length).join(' + ')} = ${raw.length} bytes`,
     );
   }

@@ -280,8 +280,8 @@ export class Renderer {
           : undefined,
       ],
       ['matched rule', result.matchedRuleId],
-      ['sent segments', result.segments.filter((s) => s.direction === 'sent').length],
-      ['received segments', result.receivedSegmentCount],
+      ['writes out', result.segments.filter((s) => s.direction === 'sent').length],
+      ['reads in', result.receivedSegmentCount],
       ['responses framed', result.responseCount],
       ['error', result.error],
     ]);
@@ -294,7 +294,7 @@ export class Renderer {
 
     if (result.segments.length > 0) {
       this.blank();
-      this.heading('TCP segments');
+      this.heading('Wire writes and reads');
       for (const segment of result.segments) {
         const arrow =
           segment.direction === 'sent' ? this.palette.outbound('→') : this.palette.inbound('←');
@@ -305,7 +305,7 @@ export class Renderer {
       }
       if (result.responseCount > 1) {
         this.note(
-          `  ${result.responseCount} SLTP responses were framed from ${result.receivedSegmentCount} TCP segment(s): ` +
+          `  ${result.responseCount} SLTP responses were framed from ${result.receivedSegmentCount} read(s): ` +
             'message boundaries are recovered by SLTP, not by TCP.',
         );
       }

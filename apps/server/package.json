@@ -1,6 +1,6 @@
 {
   "name": "@socketlens/server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "SocketLens TCP server: a raw TCP (node:net) SLTP endpoint hosting sessions, mock rules, and test execution.",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "@socketlens/core": "0.1.1",
-    "@socketlens/protocol": "0.1.1"
+    "@socketlens/core": "0.1.2",
+    "@socketlens/protocol": "0.1.2"
   }
 }

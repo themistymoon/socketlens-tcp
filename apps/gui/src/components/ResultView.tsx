@@ -58,9 +58,9 @@ export function ResultView({ result, history, onSelectResult }: ResultViewProps)
             <dd>
               {result.sentSegmentCount} write(s) carrying {formatBytes(result.rawSent.length)}
             </dd>
-            <dt>Segments in</dt>
+            <dt>Reads in</dt>
             <dd>
-              {result.receivedSegmentCount} segment(s) → {result.responseCount} framed response(s)
+              {result.receivedSegmentCount} read(s) → {result.responseCount} framed response(s)
             </dd>
             {result.matchedRuleId && (
               <>
@@ -112,7 +112,7 @@ export function ResultView({ result, history, onSelectResult }: ResultViewProps)
             </table>
           )}
 
-          <h3>TCP segments</h3>
+          <h3>Wire writes and reads</h3>
           <ol className="segments">
             {result.segments.map((segment, index) => (
               <li key={index} className={segment.direction}>

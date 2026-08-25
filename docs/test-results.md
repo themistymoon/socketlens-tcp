@@ -1,6 +1,6 @@
 # Test Results
 
-Recorded results of the verification suite for SocketLens TCP 0.1.1.
+Recorded results of the verification suite for SocketLens TCP 0.1.2.
 
 > Every figure in this document is copied from actual command output. Nothing here is
 > estimated, projected, or rounded up. Where a result is imperfect it is recorded as it
@@ -28,6 +28,14 @@ on the development machine. This is **outside** the CI matrix, which pins 20.x, 
 confirm the suite on one version above the supported range; the CI workflow is what confirms
 it on the three supported versions. This is stated rather than glossed over because a local
 pass on an untested version is weaker evidence than the matrix, and the difference matters.
+
+**On the date.** The figures below were recorded on 2026-08-05 for 0.1.1. The suite was
+re-run on **2026-08-25** before tagging 0.1.2 and every total reproduced exactly: 598 of 598
+tests across 21 files, 17 of 17 example checks, 0 lint errors and 31 lint warnings, no type
+diagnostics, a clean build. The per-file counts and timings in section 1 are **not**
+restamped, because they came from the earlier run and inventing new numbers for them would
+be a fabrication. 0.1.2 changed no protocol behaviour, so the suite it passes is the same
+suite.
 
 ---
 

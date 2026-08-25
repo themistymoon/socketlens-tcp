@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "SocketLens TCP tests",
+  "display": "SocketLens TCP tests and benchmarks",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     // Vitest resolves the workspace packages through the aliases in vitest.config.ts and
@@ -25,5 +25,8 @@
       "@socketlens/server": ["./apps/server/src/index.ts"]
     }
   },
-  "include": ["tests/**/*.ts", "tests/**/*.tsx"]
+  // The benchmark suite is typechecked here rather than in its own project: it runs under
+  // `tsx` like `examples/`, but unlike `examples/` it does arithmetic on measurements, where
+  // a silent type error would corrupt a reported number rather than throw.
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "benchmarks/**/*.ts"]
 }

@@ -278,7 +278,7 @@ describe('session and rule listings', () => {
 });
 
 describe('test results', () => {
-  it('prints the verdict, the counts, and each TCP segment', () => {
+  it('prints the verdict, the counts, and each write and read', () => {
     const { out, renderer: r } = renderer();
 
     r.result(
@@ -294,10 +294,10 @@ describe('test results', () => {
     const text = out.text();
     expect(out.lines[0]).toContain('PASSED');
     expect(out.lines[0]).toContain('ping the mock endpoint');
-    expect(text).toContain('TCP segments');
+    expect(text).toContain('Wire writes and reads');
     expect(text).toContain('→');
     expect(text).toContain('←');
-    // Segment payloads are escaped so a CRLF cannot break the one-line layout.
+    // Payloads are escaped so a CRLF cannot break the one-line layout.
     expect(text).toContain('SLTP/1.0 PING\\r\\n');
     expect(text).toContain('+3ms');
   });
@@ -310,7 +310,7 @@ describe('test results', () => {
     expect(out.lines[0]).toContain('FAILED');
   });
 
-  it('points out when several SLTP responses were framed from fewer TCP segments', () => {
+  it('points out when several SLTP responses were framed from fewer reads', () => {
     const { out, renderer: r } = renderer();
 
     r.result(
@@ -321,7 +321,7 @@ describe('test results', () => {
       }),
     );
 
-    expect(out.text()).toContain('3 SLTP responses were framed from 1 TCP segment(s)');
+    expect(out.text()).toContain('3 SLTP responses were framed from 1 read(s)');
     expect(out.text()).toContain('message boundaries are recovered by SLTP, not by TCP');
   });
 

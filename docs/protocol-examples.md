@@ -55,7 +55,7 @@ Request-ID: req-1\r\n
 ```
 SLTP/1.0 200 OK\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.1\r\n
+Server: SocketLens-TCP/0.1.2\r\n
 Timestamp: 2026-08-04T10:35:53.138Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 100\r\n
@@ -91,7 +91,7 @@ Content-Length: 17\r\n
 SLTP/1.0 201 SESSION CREATED\r\n
 Session-ID: ses-3\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.1\r\n
+Server: SocketLens-TCP/0.1.2\r\n
 Timestamp: 2026-08-04T10:13:23.837Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 249\r\n
@@ -125,7 +125,7 @@ Content-Length: 213\r\n
 ```
 SLTP/1.0 212 RULE ADDED\r\n
 Request-ID: req-1\r\n
-Server: SocketLens-TCP/0.1.1\r\n
+Server: SocketLens-TCP/0.1.2\r\n
 Timestamp: ...\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: ...\r\n
@@ -151,13 +151,13 @@ segment observed in both directions:
 
 ```
 PASSED  frag-demo  res-4
-  outcome           : passed
-  duration          : 82 ms
-  status            : 200 OK
-  matched rule      : rule-2
-  sent segments     : 3
-  received segments : 1
-  responses framed  : 1
+  outcome          : passed
+  duration         : 82 ms
+  status           : 200 OK
+  matched rule     : rule-2
+  writes out       : 3
+  reads in         : 1
+  responses framed : 1
 
 Expected versus actual
   ✔ statusCode
@@ -275,7 +275,7 @@ SLTP/1.0 PING\r\n
 ```
 SLTP/1.0 400 BAD REQUEST\r\n
 Reason: missing-request-id\r\n
-Server: SocketLens-TCP/0.1.1\r\n
+Server: SocketLens-TCP/0.1.2\r\n
 Timestamp: 2026-08-04T10:36:13.668Z\r\n
 Content-Type: application/json; charset=utf-8\r\n
 Content-Length: 92\r\n
@@ -379,7 +379,7 @@ Content-Length: abc\r\n
 ```
 SLTP/1.0 400 BAD REQUEST\r\n
 Reason: invalid-content-length\r\n
-Server: SocketLens-TCP/0.1.1\r\n
+Server: SocketLens-TCP/0.1.2\r\n
 Timestamp: 2026-08-04T10:37:09.048Z\r\n
 Connection: close\r\n
 Content-Type: application/json; charset=utf-8\r\n
@@ -482,9 +482,9 @@ Measured result:
 
 ```
 PASSED  seven-fragments  res-7
-  sent segments     : 7
-  received segments : 1
-  responses framed  : 1
+  writes out       : 7
+  reads in         : 1
+  responses framed : 1
 ```
 
 Seven writes went out. **One** message was framed at the far end.
@@ -502,17 +502,17 @@ A decoder that searched for `\r\n\r\n` in a string built by `chunk.toString()` p
 would fail at the third and fourth cuts. Buffer-based search across the accumulated buffer
 handles both.
 
-Segment trace from a live run of an ad-hoc fragmented scenario:
+Write and read trace from a live run of an ad-hoc fragmented scenario:
 
 ```
-TCP segments
+Wire writes and reads
   → +1ms  6 bytes   SLTP/1
   → +43ms 14 bytes  .0 PING\r\nReque
   → +81ms 16 bytes  st-ID: req-5\r\n\r\n
   ← +82ms 240 bytes SLTP/1.0 200 OK\r\nRequest-ID: req-5\r\nMatched-Rule-ID: rul…
 ```
 
-The second segment ends mid-`Request-ID`, in the middle of the header name.
+The second write ends mid-`Request-ID`, in the middle of the header name.
 
 ### 5.2 One byte at a time
 
@@ -521,9 +521,9 @@ most extreme fragmentation possible:
 
 ```
 PASSED  byte-at-a-time  res-8
-  sent segments     : 134
-  received segments : 1
-  responses framed  : 1
+  writes out       : 134
+  reads in         : 1
+  responses framed : 1
 ```
 
 The trace shows each byte as its own segment, including the line terminators arriving
@@ -594,9 +594,9 @@ Example 06 measures the same thing through the scenario runner:
 
 ```
 PASSED  two-messages-one-write  res-9
-  sent segments     : 1
-  received segments : 1
-  responses framed  : 2
+  writes out       : 1
+  reads in         : 1
+  responses framed : 2
 ```
 
 One segment in, **two** messages framed.
