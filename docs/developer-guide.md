@@ -75,7 +75,7 @@ npm test
 The test suite does **not** require the build: Vitest resolves every workspace import to
 TypeScript source (§4). A clean checkout can go straight from `npm ci` to `npm test`.
 
-At the time of writing that is 16 test files and 434 tests, finishing in a couple of
+At the time of writing that is 22 test files and 612 tests, finishing in a few
 seconds. Roughly a quarter of them open real TCP sockets on loopback.
 
 ### Confirming the whole toolchain
@@ -737,10 +737,15 @@ is rebuilt:
 
 ### Step 6 — Documentation
 
-Both documents are normative and both are maintained **by hand**. The header comment in
-`status.ts` describes `docs/status-codes.md` as generated from the same information; there
-is no generator script in the repository, so "generated" states the intent, and keeping the
-two identical is your responsibility.
+Both documents are normative and both are written **by hand**; there is no generator script
+in the repository. They are, however, checked:
+[`tests/protocol/docs-registry-consistency.test.ts`](../tests/protocol/docs-registry-consistency.test.ts)
+compares §2, §4 and §5 of `docs/status-codes.md`, and §11 and §12 of the specification,
+against `SLTP_STATUS_REGISTRY`, `SLTP_OPERATION_REGISTRY`, and the reason taxonomy. Add a
+status code without touching the documents and `npm test` fails, naming the table that is
+now short an entry. What the test cannot check is the prose — the "Meaning", "Sent when" and
+"Why the stream is unrecoverable" columns, and the depth of a new §4 subsection. Those are
+still yours to get right.
 
 | Document                                                        | What to change                                                                                                                                                                                                               |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -881,10 +886,12 @@ Then, by hand:
 - Confirm the `version` field in the root `package.json` and in all six workspace
   `package.json` files agrees with the tag. They are all `0.1.2` today and are expected to
   move together.
-- Confirm the documents still match the code, in particular the two normative registries:
+- Confirm the documents still match the code. The two normative registries are already
+  covered: `tests/protocol/docs-registry-consistency.test.ts` checks
   `SLTP_OPERATION_REGISTRY` against [`docs/protocol-specification.md`](./protocol-specification.md) §11,
-  and `SLTP_STATUS_REGISTRY` against [`docs/status-codes.md`](./status-codes.md) and §12
-  of the specification. Nothing enforces this automatically.
+  and `SLTP_STATUS_REGISTRY` against [`docs/status-codes.md`](./status-codes.md) and §12 of
+  the specification, so `verify` above has already proved the tables agree. Read the prose
+  columns, which no test can check.
 - Check `socketlens --help`, `socketlens help operations` and `socketlens help status`
   against [`docs/user-guide.md`](./user-guide.md) §3.1.
 - Sanity-check the built artefacts by running them rather than the sources:

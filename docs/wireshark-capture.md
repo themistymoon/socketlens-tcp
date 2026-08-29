@@ -309,8 +309,11 @@ Note where the second message begins: immediately after the first body, with **n
 no marker, and no gap**. The only thing that says where the first message ends is its
 `Content-Length`. The server answers twice, and both `Request-ID` values come back.
 
-Together with §6.2 this is the complete argument: one write produced two messages; six writes
-produced one. Nothing at the socket layer distinguishes these cases.
+Together with §6.2 this is the complete argument, both halves of it from this generator's own
+scenarios: the `coalescing` scenario's one application write produced two messages, and the
+`fragmentation` scenario's six application writes produced one. Nothing at the socket layer
+distinguishes these cases. (Example 05 makes the same point with a seven-write split; it is a
+separate demonstration, and the two write counts are not interchangeable.)
 
 ### 6.4 `delay` — timing is visible
 
@@ -403,16 +406,16 @@ own framing state. Sharing one would interleave two byte streams and corrupt bot
 
 Rehearse this. It is short because it does one thing.
 
-| #   | Step                                                                                       | Say                                                                                      |
-| --- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| 1   | Capture already running on the loopback adapter, filter `tcp.port == 7420` visible         | "This is real TCP on loopback, port 7420. No HTTP anywhere."                             |
-| 2   | `npm run wireshark:demo -- --scenario ping`                                                | "One request, one response."                                                             |
-| 3   | Follow → TCP Stream                                                                        | "`SLTP/1.0 PING`. Our own start line — no method, no path, no `Host`."                   |
-| 4   | Point at `Request-ID`, then `Content-Length`, then the response status line                | "Same ID both directions, so replies can come back out of order. Length in bytes."       |
-| 5   | `npm run wireshark:demo -- --scenario fragmentation`                                       | "Six writes for one message."                                                            |
-| 6   | Apply `tcp.len > 0`, count the payload segments, compare with six                          | "The OS decided the segmentation, not us. Still exactly one message framed."             |
-| 7   | `npm run wireshark:demo -- --scenario coalescing`, Follow TCP Stream                       | "One write, two messages, no delimiter between them. Only `Content-Length` separates."   |
-| 8   | `npm run wireshark:demo -- --scenario malformed`, point at `400`, `Connection: close`, FIN | "Length can't be trusted, so the stream can't be resynchronised. We say so, then close." |
+| #   | Step                                                                                       | Say                                                                                        |
+| --- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 1   | Capture already running on the loopback adapter, filter `tcp.port == 7420` visible         | "This is real TCP on loopback, port 7420. No HTTP anywhere."                               |
+| 2   | `npm run wireshark:demo -- --scenario ping`                                                | "One request, one response."                                                               |
+| 3   | Follow → TCP Stream                                                                        | "`SLTP/1.0 PING`. Our own start line — no method, no path, no `Host`."                     |
+| 4   | Point at `Request-ID`, then `Content-Length`, then the response status line                | "Same ID both directions, so replies can come back out of order. Length in bytes."         |
+| 5   | `npm run wireshark:demo -- --scenario fragmentation`                                       | "Six application writes for one message — this generator's split, not example 05's seven." |
+| 6   | Apply `tcp.len > 0`, count the payload segments, compare with six                          | "The OS decided the segmentation, not us. Still exactly one message framed."               |
+| 7   | `npm run wireshark:demo -- --scenario coalescing`, Follow TCP Stream                       | "One write, two messages, no delimiter between them. Only `Content-Length` separates."     |
+| 8   | `npm run wireshark:demo -- --scenario malformed`, point at `400`, `Connection: close`, FIN | "Length can't be trusted, so the stream can't be resynchronised. We say so, then close."   |
 
 Stop there. Do not walk through all thirteen operations.
 

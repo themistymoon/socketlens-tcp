@@ -118,17 +118,17 @@ origin.
 
 ### 2.5 Mock rules
 
-| ID        | Requirement                                                                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **FR-34** | The system MUST support adding, updating, deleting and listing mock rules within a session.                                                                                                                                            |
-| **FR-35** | A rule MUST be able to match on operation, headers, and body, with body match modes `exact`, `contains`, `json-subset` and `regex`.                                                                                                    |
-| **FR-36** | Rule evaluation order MUST be deterministic: **priority descending, then insertion sequence ascending**. The first enabled matching rule wins. The ordering rule MUST be reported to clients rather than left implicit.                |
-| **FR-37** | Rule matching MUST produce a trace giving, for each rule that did not match, the reason it was rejected.                                                                                                                               |
-| **FR-38** | The store MUST reject conflicting rules with `409 RULE CONFLICT` in three cases: a duplicate rule identifier, a duplicate rule name within the session, and an identical match specification at the same priority among enabled rules. |
-| **FR-39** | A rule MUST be able to be disabled without being deleted.                                                                                                                                                                              |
-| **FR-40** | A rule's response MUST be able to specify a delay before the first byte, an explicit segmentation of the response into TCP writes with an optional inter-fragment delay, and a deliberate disconnect after a given number of bytes.    |
-| **FR-41** | Concurrent responses on one endpoint connection MUST be serialised, so that a delayed reply cannot overtake an earlier one.                                                                                                            |
-| **FR-42** | Rule hits MUST be counted, and the identifier of the rule that produced a response MUST be reported back on the response.                                                                                                              |
+| ID        | Requirement                                                                                                                                                                                                                                          |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-34** | The system MUST support adding, updating, deleting and listing mock rules within a session.                                                                                                                                                          |
+| **FR-35** | A rule MUST be able to match on operation, headers, and body, with body match modes `exact`, `contains`, `json-subset` and `regex`.                                                                                                                  |
+| **FR-36** | Rule evaluation order MUST be deterministic: **priority descending, then insertion sequence ascending**. The first enabled matching rule wins. The ordering rule MUST be reported to clients rather than left implicit.                              |
+| **FR-37** | Rule matching MUST produce a trace giving, for each rule that did not match, the reason it was rejected.                                                                                                                                             |
+| **FR-38** | The store MUST reject conflicting rules with `409 RULE CONFLICT` in three cases: a duplicate rule identifier, a duplicate rule name within the session, and an identical match specification at the same priority among enabled rules.               |
+| **FR-39** | A rule MUST be able to be disabled without being deleted.                                                                                                                                                                                            |
+| **FR-40** | A rule's response MUST be able to specify a delay before the first byte, an explicit segmentation of the response into separate application writes with an optional inter-fragment delay, and a deliberate disconnect after a given number of bytes. |
+| **FR-41** | Concurrent responses on one endpoint connection MUST be serialised, so that a delayed reply cannot overtake an earlier one.                                                                                                                          |
+| **FR-42** | Rule hits MUST be counted, and the identifier of the rule that produced a response MUST be reported back on the response.                                                                                                                            |
 
 ### 2.6 Scenarios and test execution
 
@@ -253,12 +253,12 @@ origin.
 
 ### 3.7 Usability and diagnostics
 
-| ID         | Requirement                                                                                                                                                           |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **NFR-26** | Error messages MUST state what was wrong and what to do about it, in full sentences, and MUST name the specific offending value where one exists.                     |
-| **NFR-27** | Status codes MUST be reported with their reason phrases, never as bare numbers.                                                                                       |
-| **NFR-28** | Documentation MUST be generated from or verified against the source registries, so that the operation, status and reason tables cannot drift from the implementation. |
-| **NFR-29** | Output MUST be usable without colour, and MUST offer a machine-readable form for scripting.                                                                           |
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **NFR-26** | Error messages MUST state what was wrong and what to do about it, in full sentences, and MUST name the specific offending value where one exists.                                                                                                                                                                                          |
+| **NFR-27** | Status codes MUST be reported with their reason phrases, never as bare numbers.                                                                                                                                                                                                                                                            |
+| **NFR-28** | The documented operation, status and reason tables MUST be verified against the source registries by an automated check, so that they cannot silently drift from the implementation. Verification, rather than generation, is sufficient; prose columns written for a reader are outside the check and remain a reviewer's responsibility. |
+| **NFR-29** | Output MUST be usable without colour, and MUST offer a machine-readable form for scripting.                                                                                                                                                                                                                                                |
 
 ---
 
@@ -303,9 +303,9 @@ exists.
 
 ### 4.3 Known gap in v0.1
 
-`202 TEST ACCEPTED` is present in the status registry, described as the answer to a
-`RUN_TEST` whose body requests asynchronous execution, and listed among `RUN_TEST`'s
-success statuses. **Asynchronous test execution is not implemented in v0.1.** `RUN_TEST`
+`202 TEST ACCEPTED` is present in the status registry and listed among `RUN_TEST`'s success
+statuses, and its registry metadata marks it as reserved for a future asynchronous mode.
+**Asynchronous test execution is not implemented in v0.1.** `RUN_TEST`
 is always synchronous and answers only `210`, `211` or `408`. The code is therefore
 reserved but unreachable. Asynchronous execution is future work; the registry entry should
 be read as a reservation, not as a capability.

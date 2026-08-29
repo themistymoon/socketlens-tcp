@@ -58,10 +58,13 @@ export const SLTP_STATUS = {
 export type SltpStatusCode = (typeof SLTP_STATUS)[keyof typeof SLTP_STATUS];
 
 /**
- * The registry, ordered by code. `docs/status-codes.md` documents the same information
- * and MUST stay identical to this table. It is currently maintained by hand, so a change
- * here is incomplete until that document is updated to match; generating it from this
- * registry is tracked in `ROADMAP.md`.
+ * The registry, ordered by code. `docs/status-codes.md` and `docs/protocol-specification.md`
+ * §12 restate the same information and MUST stay identical to this table. Those documents
+ * are written by hand, but they are not unchecked:
+ * `tests/protocol/docs-registry-consistency.test.ts` compares their tables against this
+ * registry, so a code, phrase, category, or ordering change here fails the suite until the
+ * documents are updated to match. Generating them from this registry instead is tracked in
+ * `ROADMAP.md`.
  */
 export const SLTP_STATUS_REGISTRY: readonly SltpStatusDefinition[] = [
   {
@@ -87,8 +90,9 @@ export const SLTP_STATUS_REGISTRY: readonly SltpStatusDefinition[] = [
     phrase: 'TEST ACCEPTED',
     category: 'success',
     meaning:
-      'A test scenario was validated and queued for asynchronous execution. The Result-ID header identifies the pending result, which is retrieved with GET_RESULT.',
-    context: 'RUN_TEST when the request body sets "mode": "async".',
+      'Reserved for a future asynchronous RUN_TEST mode; no v0.1 code path emits it. It would mean a scenario was validated and queued for later execution, with the Result-ID header naming the pending result, retrieved with GET_RESULT.',
+    context:
+      'Nothing in v0.1. RUN_TEST is always synchronous and answers 210, 211, or 408; the code stays registered among its success statuses as a reservation, not a capability. Recorded as a known gap in docs/requirements.md §4.3.',
     closesConnection: false,
   },
   {

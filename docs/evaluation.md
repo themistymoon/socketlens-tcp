@@ -38,8 +38,9 @@ being solved, and almost none let you ask for the awkward cases deliberately. SL
 specified so that this is possible — a machine-readable `Reason` taxonomy, a fatal/non-fatal
 classification, an explicit byte-counted `Content-Length`, and an order-independent
 `Request-ID` — and the harness makes it visible: a developer can say "send this one message as
-seven writes with the cuts inside the CRLF delimiters, then tell me exactly what arrived" and
-get back the bytes, the write count, the read count, and the number of messages framed.
+seven application writes with the cuts inside the CRLF delimiters, then tell me exactly what
+arrived" — which is what example 05 does — and get back the bytes, the write count, the read
+count, and the number of messages framed.
 
 Those last three numbers are the point, and they are three different numbers. The scenario
 chooses the write boundaries; the operating system chooses the segment boundaries; the decoder
@@ -54,16 +55,16 @@ undermining anything.
 
 ### 3.1 Framing and the byte stream
 
-| Claim                                                                                             | Kind            | Evidence                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| One application message can be written as many separate writes and is still framed as exactly one | Test result     | `tests/protocol/decoder.test.ts` — start line split mid-token, split between a CR and its LF, split one byte before the end of the header delimiter, and byte-at-a-time delivery                |
-| Several application messages written at once are framed as several messages                       | Test result     | `tests/server/concurrency.test.ts` — _"splits two coalesced requests arriving in one TCP write into two responses"_, asserting three segments after splitting on the status line                |
-| Framing never depends on chunk boundaries                                                         | Design property | `packages/protocol/src/decoder.ts` — one `Buffer` per connection, delimiter search resumes from `searchOffset`, UTF-8 decoded only once a complete body is present                              |
-| `Content-Length` is counted in UTF-8 **bytes**, not characters                                    | Test result     | `tests/protocol/decoder.test.ts` — _"frames a body by UTF-8 byte length, not JavaScript string length"_; the encoder computes it from `Buffer.byteLength` and ignores any caller-supplied value |
-| A multi-byte character split across reads is harmless                                             | Test result     | `tests/server/scenarios.test.ts` — a body containing multibyte UTF-8 split across writes                                                                                                        |
-| Each connection owns exactly one decoder                                                          | Design property | Constructed per connection in `apps/server/src/server.ts`, `packages/core/src/mock-endpoint.ts`, and `packages/core/src/client.ts`; sharing one would interleave two byte streams               |
-| Deliberate write patterns cross a real kernel TCP stack, not an in-process double                 | Design property | `packages/core/src/mock-endpoint.ts` binds a real `node:net` listener per session on an OS-assigned port; the runner reaches it over an actual TCP connection                                   |
-| 11 runnable examples demonstrate these properties and are checked against their own documentation | Feature         | `npm run examples` exits non-zero when an example's README disagrees with observed behaviour                                                                                                    |
+| Claim                                                                                             | Kind            | Evidence                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One application message can be written as many separate writes and is still framed as exactly one | Test result     | `tests/protocol/decoder.test.ts` — start line split mid-token, split between a CR and its LF, split one byte before the end of the header delimiter, and byte-at-a-time delivery                                           |
+| Several application messages written at once are framed as several messages                       | Test result     | `tests/server/concurrency.test.ts` — _"splits two coalesced requests arriving in one TCP write into two responses"_, asserting the received bytes split into three pieces on the status line, so two responses were framed |
+| Framing never depends on chunk boundaries                                                         | Design property | `packages/protocol/src/decoder.ts` — one `Buffer` per connection, delimiter search resumes from `searchOffset`, UTF-8 decoded only once a complete body is present                                                         |
+| `Content-Length` is counted in UTF-8 **bytes**, not characters                                    | Test result     | `tests/protocol/decoder.test.ts` — _"frames a body by UTF-8 byte length, not JavaScript string length"_; the encoder computes it from `Buffer.byteLength` and ignores any caller-supplied value                            |
+| A multi-byte character split across reads is harmless                                             | Test result     | `tests/server/scenarios.test.ts` — a body containing multibyte UTF-8 split across writes                                                                                                                                   |
+| Each connection owns exactly one decoder                                                          | Design property | Constructed per connection in `apps/server/src/server.ts`, `packages/core/src/mock-endpoint.ts`, and `packages/core/src/client.ts`; sharing one would interleave two byte streams                                          |
+| Deliberate write patterns cross a real kernel TCP stack, not an in-process double                 | Design property | `packages/core/src/mock-endpoint.ts` binds a real `node:net` listener per session on an OS-assigned port; the runner reaches it over an actual TCP connection                                                              |
+| 11 runnable examples demonstrate these properties and are checked against their own documentation | Feature         | `npm run examples` exits non-zero when an example's README disagrees with observed behaviour                                                                                                                               |
 
 ### 3.2 Failure modes as first-class behaviour
 
@@ -274,18 +275,18 @@ protocol that accepted a negative `Content-Length` would be faster and worse.
 
 ## 7. Limitations of v0.1.2
 
-| Limitation                                                         | Detail                                                                                                                                                          |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| In-memory only                                                     | Stopping the server discards every session, rule, and result                                                                                                    |
-| No authentication or authorisation                                 | Any process that can open the control port has full control                                                                                                     |
-| Loopback only                                                      | By default and by design; the bridge refuses a non-loopback `--host` outright                                                                                   |
-| No TLS, no compression, no binary framing mode                     | SLTP/1.0 is plaintext text-based framing                                                                                                                        |
-| One protocol implemented                                           | Framing, rules, and assertions are SLTP-specific; `raw --text` puts arbitrary bytes on the wire but the reply is still framed as SLTP                           |
-| No concurrency benchmark                                           | The suite measures one connection, sequential. Behaviour under many connections is untested for performance                                                     |
-| Benchmark variance is high                                         | Up to 53.9% min-max spread across runs; the conclusion rests on a paired sign test over rounds rather than on gap size, and needs `--runs 10` on an idle system |
-| Slower than a comparable HTTP/1.1 implementation                   | Measured, §4: median 1.21×–1.82×. Accepted in exchange for strictness                                                                                           |
-| `docs/status-codes.md` is maintained by hand                       | Nothing mechanically prevents it drifting from the registry; generating it is a roadmap item                                                                    |
-| `sentSegmentCount` / `receivedSegmentCount` are named misleadingly | They count application writes and reads, not TCP segments. The names are kept for wire compatibility; the field documentation says so explicitly                |
+| Limitation                                                         | Detail                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| In-memory only                                                     | Stopping the server discards every session, rule, and result                                                                                                                                                              |
+| No authentication or authorisation                                 | Any process that can open the control port has full control                                                                                                                                                               |
+| Loopback only                                                      | By default and by design; the bridge refuses a non-loopback `--host` outright                                                                                                                                             |
+| No TLS, no compression, no binary framing mode                     | SLTP/1.0 is plaintext text-based framing                                                                                                                                                                                  |
+| One protocol implemented                                           | Framing, rules, and assertions are SLTP-specific; `raw --text` puts arbitrary bytes on the wire but the reply is still framed as SLTP                                                                                     |
+| No concurrency benchmark                                           | The suite measures one connection, sequential. Behaviour under many connections is untested for performance                                                                                                               |
+| Benchmark variance is high                                         | Up to 53.9% min-max spread across runs; the conclusion rests on a paired sign test over rounds rather than on gap size, and needs `--runs 10` on an idle system                                                           |
+| Slower than a comparable HTTP/1.1 implementation                   | Measured, §4: median 1.21×–1.82×. Accepted in exchange for strictness                                                                                                                                                     |
+| Registry documentation is written by hand, not generated           | `tests/protocol/docs-registry-consistency.test.ts` checks the tables against the registries, so entries cannot drift silently; the prose columns are still unchecked, and generating the documents remains a roadmap item |
+| `sentSegmentCount` / `receivedSegmentCount` are named misleadingly | They count application writes and reads, not TCP segments. The names are kept for wire compatibility; the field documentation says so explicitly                                                                          |
 
 ## 8. What a packet capture adds, and what it does not
 
@@ -324,6 +325,6 @@ Procedure: [`wireshark-capture.md`](wireshark-capture.md).
 | Is SLTP faster than HTTP/1.1?       | No. Measured 1.21×–1.82× slower than a comparable implementation, losing 39 of 40 paired rounds       |
 | Is it more compact?                 | Requests yes (41 vs 136 bytes empty), responses no (90 vs 85)                                         |
 | Then what is it good for?           | Making the framing layer observable and its failure modes reproducible on demand                      |
-| What is the strongest evidence?     | 598 automated tests, 11 self-checking examples, and a packet capture confirming the bytes on the wire |
+| What is the strongest evidence?     | 612 automated tests, 11 self-checking examples, and a packet capture confirming the bytes on the wire |
 | What is the weakest part of v0.1.2? | No persistence and no authentication, and a benchmark limited to one sequential connection            |
 | Was the performance claim measured? | Yes, and it went against the project's own protocol. It is reported unchanged                         |

@@ -48,7 +48,7 @@ Initial release. SocketLens TCP is a local developer tool for designing, mocking
 - An operation registry of thirteen operations: `PING`, `SERVER_INFO`, `CREATE_SESSION`, `GET_SESSION`, `LIST_SESSIONS`, `ADD_RULE`, `UPDATE_RULE`, `DELETE_RULE`, `LIST_RULES`, `RUN_TEST`, `GET_RESULT`, `LIST_RESULTS`, and `CLOSE_SESSION`. Each entry declares its target endpoint, whether a session and a body are required, and its permitted success codes. A syntactically valid but unregistered token is answered with `501 OPERATION NOT SUPPORTED`.
 - A status registry whose numeric ranges are deliberately familiar to readers of HTTP but whose meanings are normative for SLTP. Several codes have no HTTP counterpart, including `210 TEST PASSED`, `211 TEST FAILED`, `410 NO MATCHING RULE`, and the rule lifecycle codes `212`, `213`, and `214`.
 - A defined header set covering `Request-ID`, `Session-ID`, `Content-Length`, `Content-Type`, `Timestamp`, `Connection`, `Response-Delay`, `Matched-Rule-ID`, `Result-ID`, `Reason`, `Server`, and `Retry-After`.
-- Message encoding and validation, with the protocol package written free of any Node.js API so that the browser interface can import it directly.
+- Message encoding and validation in a package that imports no `node:` module. The encoder and decoder use the `Buffer` global, because framing is done on bytes; the browser interface imports `@socketlens/protocol/browser`, a subset that excludes them and is free of `Buffer` and every Node.js global.
 
 #### Incremental TCP stream decoder
 
@@ -82,7 +82,7 @@ Initial release. SocketLens TCP is a local developer tool for designing, mocking
 - An assertion library covering status codes, status phrases, headers, and JSON body subsets, with expected-versus-actual reporting that names the specific assertion that did not hold.
 - Timeouts, defaulting to 5 seconds, reported as `408 TEST TIMEOUT` unless the scenario declares a timeout as its expected outcome, in which case the run passes.
 - Scenarios able to specify how a message is split across writes, so fragmentation can be reproduced deterministically.
-- Synchronous and asynchronous execution modes, the latter returning `202 TEST ACCEPTED` with a `Result-ID` for later retrieval.
+- Synchronous execution only: `RUN_TEST` runs the scenario to completion and answers with the outcome. `202 TEST ACCEPTED` is registered in the status registry and reserved for a future asynchronous mode, but no code path reaches it in v0.1; see the known gaps in `docs/requirements.md`.
 - Stored results including the raw bytes sent and received, retrievable individually or as a summary list.
 - Scenario and rule validation that reports every problem at once rather than stopping at the first, returning `422 INVALID SCENARIO` for a well-formed message describing a semantically invalid scenario.
 

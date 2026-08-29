@@ -34,7 +34,7 @@ Any change here will be a new format version. `socketlens-scenario-bundle/1` wil
 
 ### Documentation of the wire format as a specification
 
-The operation and status registries in `packages/protocol` are already the normative source, and [`docs/status-codes.md`](docs/status-codes.md) documents the status registry in full. That document is currently maintained by hand, which is exactly the drift risk the project warns about elsewhere: nothing mechanically enforces that it matches `SLTP_STATUS_REGISTRY`. Generating it from the registry instead, and extending the generator to the operation registry and the header set, would give SLTP a specification document that is checked rather than maintained by hand — consistent with the rule that documentation and implementation must agree.
+The operation and status registries in `packages/protocol` are already the normative source, and [`docs/status-codes.md`](docs/status-codes.md) documents the status registry in full. That document is written by hand, but it is no longer unchecked: `tests/protocol/docs-registry-consistency.test.ts` compares its tables — and §11 and §12 of the specification — against `SLTP_OPERATION_REGISTRY`, `SLTP_STATUS_REGISTRY`, and the reason taxonomy, so an entry cannot go missing, appear twice, move, or lose its canonical phrase without failing the suite. What remains hand-written is the prose: the meaning and context columns and the depth of each §4 subsection. Generating those sections from the registries, and extending the generator to the header set, would remove the last of the duplication — consistent with the rule that documentation and implementation must agree.
 
 ### Interface parity with the CLI
 

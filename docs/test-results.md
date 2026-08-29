@@ -29,13 +29,16 @@ confirm the suite on one version above the supported range; the CI workflow is w
 it on the three supported versions. This is stated rather than glossed over because a local
 pass on an untested version is weaker evidence than the matrix, and the difference matters.
 
-**On the date.** The figures below were recorded on 2026-08-05 for 0.1.1. The suite was
-re-run on **2026-08-25** before tagging 0.1.2 and every total reproduced exactly: 598 of 598
-tests across 21 files, 17 of 17 example checks, 0 lint errors and 31 lint warnings, no type
-diagnostics, a clean build. The per-file counts and timings in section 1 are **not**
-restamped, because they came from the earlier run and inventing new numbers for them would
-be a fabrication. 0.1.2 changed no protocol behaviour, so the suite it passes is the same
-suite.
+**On the date.** The figures below were recorded on 2026-08-05 for 0.1.1 and re-run on
+**2026-08-25** before tagging 0.1.2, when every total reproduced exactly. They were re-run
+again on **2026-08-28**, after `tests/protocol/docs-registry-consistency.test.ts` was added:
+612 of 612 tests across 22 files, 17 of 17 example checks, 0 lint errors and 31 lint
+warnings, no type diagnostics, a clean build. The totals below and the new file's row in
+section 1 come from that run. **Every other per-file count and timing in section 1 is still
+from the 2026-08-05 run and is not restamped**, because inventing new numbers for them would
+be a fabrication — the counts are unchanged, and only the timings would differ. No protocol
+behaviour changed in 0.1.2 or in the pass that added the consistency test, so the suite these
+totals describe is the earlier suite plus 14 documentation checks.
 
 ---
 
@@ -46,11 +49,11 @@ suite.
 | Formatting                 | `prettier --check .`     | **pass** — all matched files     |
 | Linting                    | `eslint .`               | **pass** — 0 errors, 31 warnings |
 | Type checking              | `tsc -b` + `tsc -p`      | **pass** — no diagnostics        |
-| Unit and integration tests | `vitest run`             | **pass** — 598 / 598             |
+| Unit and integration tests | `vitest run`             | **pass** — 612 / 612             |
 | Production build           | `build:ts` + `build:gui` | **pass**                         |
 | Runnable examples          | `npm run examples`       | **pass** — 17 / 17 checks        |
 
-Total: **598 automated tests** across 21 files, plus **17 example checks** across 11
+Total: **612 automated tests** across 22 files, plus **17 example checks** across 11
 example bundles.
 
 ---
@@ -58,37 +61,44 @@ example bundles.
 ## 1. Test suite
 
 ```
- Test Files  21 passed (21)
-      Tests  598 passed (598)
-   Duration  5.31s (transform 2.07s, collect 9.81s, tests 8.43s, prepare 5.26s)
+ Test Files  22 passed (22)
+      Tests  612 passed (612)
+   Duration  4.69s (transform 1.36s, setup 0ms, collect 6.51s, tests 7.51s, environment 425ms, prepare 3.06s)
 ```
 
 ### Per-file results
 
-| File                               |   Tests |    Time | Layer                                 |
-| ---------------------------------- | ------: | ------: | ------------------------------------- |
-| `tests/protocol/decoder.test.ts`   |      55 |   25 ms | framing, the core correctness concern |
-| `tests/protocol/encoder.test.ts`   |      17 |   15 ms | message serialisation                 |
-| `tests/protocol/validate.test.ts`  |      21 |   16 ms | structural validation                 |
-| `tests/core/validation.test.ts`    |      56 |   26 ms | bundle, rule, and scenario validation |
-| `tests/core/matching.test.ts`      |      42 |   18 ms | rule matching and ordering            |
-| `tests/core/assertions.test.ts`    |      29 |   17 ms | expected-versus-actual comparison     |
-| `tests/core/session-store.test.ts` |      36 |  153 ms | session and rule lifecycle            |
-| `tests/cli/options.test.ts`        |      32 |   18 ms | argument parsing                      |
-| `tests/cli/dispatch.test.ts`       |      29 |   86 ms | command routing                       |
-| `tests/cli/render.test.ts`         |      26 |   48 ms | output formatting                     |
-| `tests/cli/help.test.ts`           |      15 |   16 ms | help text                             |
-| `tests/cli/repl.test.ts`           |      33 |  599 ms | interactive mode, real sockets        |
-| `tests/bridge/options.test.ts`     |      50 |   13 ms | bridge argument parsing               |
-| `tests/bridge/events.test.ts`      |      17 |   40 ms | Server-Sent-Events fan-out            |
-| `tests/bridge/relay.test.ts`       |      25 | 3843 ms | relay contracts, real sockets         |
-| `tests/bridge/http.test.ts`        |      39 | 1661 ms | bridge routes, real `fetch`           |
-| `tests/gui/form-parsing.test.ts`   |      18 |    9 ms | editor field parsing                  |
-| `tests/gui/result-view.test.tsx`   |       6 |  134 ms | result panel rendering                |
-| `tests/server/server.test.ts`      |      20 |  462 ms | integration, real TCP sockets         |
-| `tests/server/scenarios.test.ts`   |      19 |  816 ms | integration, scenario execution       |
-| `tests/server/concurrency.test.ts` |      13 |  532 ms | integration, multiple clients         |
-| **Total**                          | **598** |         |                                       |
+| File                                               |   Tests |    Time | Layer                                   |
+| -------------------------------------------------- | ------: | ------: | --------------------------------------- |
+| `tests/protocol/decoder.test.ts`                   |      55 |   25 ms | framing, the core correctness concern   |
+| `tests/protocol/encoder.test.ts`                   |      17 |   15 ms | message serialisation                   |
+| `tests/protocol/validate.test.ts`                  |      21 |   16 ms | structural validation                   |
+| `tests/protocol/docs-registry-consistency.test.ts` |      14 |   10 ms | documented tables versus the registries |
+| `tests/core/validation.test.ts`                    |      56 |   26 ms | bundle, rule, and scenario validation   |
+| `tests/core/matching.test.ts`                      |      42 |   18 ms | rule matching and ordering              |
+| `tests/core/assertions.test.ts`                    |      29 |   17 ms | expected-versus-actual comparison       |
+| `tests/core/session-store.test.ts`                 |      36 |  153 ms | session and rule lifecycle              |
+| `tests/cli/options.test.ts`                        |      32 |   18 ms | argument parsing                        |
+| `tests/cli/dispatch.test.ts`                       |      29 |   86 ms | command routing                         |
+| `tests/cli/render.test.ts`                         |      26 |   48 ms | output formatting                       |
+| `tests/cli/help.test.ts`                           |      15 |   16 ms | help text                               |
+| `tests/cli/repl.test.ts`                           |      33 |  599 ms | interactive mode, real sockets          |
+| `tests/bridge/options.test.ts`                     |      50 |   13 ms | bridge argument parsing                 |
+| `tests/bridge/events.test.ts`                      |      17 |   40 ms | Server-Sent-Events fan-out              |
+| `tests/bridge/relay.test.ts`                       |      25 | 3843 ms | relay contracts, real sockets           |
+| `tests/bridge/http.test.ts`                        |      39 | 1661 ms | bridge routes, real `fetch`             |
+| `tests/gui/form-parsing.test.ts`                   |      18 |    9 ms | editor field parsing                    |
+| `tests/gui/result-view.test.tsx`                   |       6 |  134 ms | result panel rendering                  |
+| `tests/server/server.test.ts`                      |      20 |  462 ms | integration, real TCP sockets           |
+| `tests/server/scenarios.test.ts`                   |      19 |  816 ms | integration, scenario execution         |
+| `tests/server/concurrency.test.ts`                 |      13 |  532 ms | integration, multiple clients           |
+| **Total**                                          | **612** |         |                                         |
+
+Every timing above except `docs-registry-consistency.test.ts` is from the 2026-08-05 run, as
+stated at the top of this document; that one row is from the 2026-08-28 run that added the
+file. Its 10 ms is reading five markdown documents and comparing parsed tables against three
+in-memory registries, which is why it costs about what a pure unit suite costs despite
+touching the filesystem.
 
 The three `tests/server/*` files bind real TCP ports on the loopback interface rather than
 mocking the socket layer. That is deliberate: a mocked socket would deliver bytes in exactly

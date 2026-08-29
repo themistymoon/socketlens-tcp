@@ -24,7 +24,7 @@ npm run build
 
 Six workspaces, declared as `packages/*` and `apps/*`:
 
-- `packages/protocol` — SLTP message types, the encoder, the incremental stream decoder, and the operation and status registries. This package touches no Node.js API, so the browser interface can import it directly.
+- `packages/protocol` — SLTP message types, the encoder, the incremental stream decoder, and the operation and status registries. It imports no `node:` module, but the encoder, decoder, and `format.ts` use the `Buffer` global, since framing has to be done on bytes. The browser interface imports the browser-safe subset, `@socketlens/protocol/browser`, which excludes those and keeps the registries, header helpers, view types, and string-only display helpers.
 - `packages/core` — shared domain logic: sessions, mock rules, matching, scenarios, assertions, the SLTP client, and protocol logging.
 - `apps/server` — the raw TCP control server, plus the per-session mock endpoints.
 - `apps/cli` — the command-line client. It is the primary client and is fully functional with no graphical interface present.

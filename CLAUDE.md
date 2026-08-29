@@ -14,7 +14,7 @@ MIT licence, copyright 2026 Natthakit Jantawong. Node `>=20.11.0`.
 
 An npm workspaces monorepo, six workspaces, built as one TypeScript composite project.
 
-- `packages/protocol` — SLTP message types, encoder, incremental stream decoder, validation, and the operation and status registries. **Touches no Node.js API**, so the browser can import it. Keep it that way; `browser.ts` is the browser-safe entry point.
+- `packages/protocol` — SLTP message types, encoder, incremental stream decoder, validation, and the operation and status registries. It **imports no `node:` module**, but the framing implementation is Node-oriented: `encoder.ts`, `decoder.ts`, and `format.ts` use the `Buffer` global, because framing must be done on bytes. The browser therefore imports `@socketlens/protocol/browser`, the browser-safe subset — constants, both registries, header helpers, reason codes, the JSON-safe view types, and the string-only display helpers, which measure UTF-8 length with `TextEncoder`. That subset deliberately excludes Buffer-based encoding and decoding. Keep it that way: `browser.ts` must stay free of `Buffer`, `node:net`, and every Node.js global.
 - `packages/core` — sessions, mock rules, matching, scenarios, assertions, the SLTP client, protocol logging. Depends on `protocol`.
 - `apps/server` — the raw TCP control server on `127.0.0.1:7420`, plus an ephemeral per-session TCP mock endpoint. Each connection owns its own decoder, receive buffer, and rate limiter.
 - `apps/cli` — `socketlens`, the primary client. Must stay fully functional with no interface present.
@@ -100,7 +100,7 @@ Documentation and implementation are expected to agree at every commit.
 
 - **Every protocol example in any document must be valid per the current implementation** — a registered operation, a registered status code and its exact canonical phrase, real header names, CRLF line endings, and a `Content-Length` that is the correct **byte** count. Bytes and characters differ for any non-ASCII body.
 - `npm run examples` enforces this for `examples/`: the runner exits non-zero when an example's README disagrees with the code. If you change protocol behaviour, update the affected example README in the same change.
-- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. `docs/status-codes.md` documents the status registry in full but is **maintained by hand**, so nothing mechanically stops the two from drifting — change the registry and you must update that document in the same change. Generating it is a roadmap item. `docs/` holds fifteen documents; see the table in `README.md`.
+- The status registry in `packages/protocol/src/status.ts` is the normative source for status codes, and the operation registry in `operations.ts` for operations. `docs/protocol-specification.md` §11 and §12, and the tables in `docs/status-codes.md`, restate both by hand — but `tests/protocol/docs-registry-consistency.test.ts` compares them against the registries on every `npm test`, so a missing, extra, reordered, or mis-phrased entry fails the suite. Change a registry and that test tells you which document to update. It checks the machine-derivable columns only; the prose columns are still yours to keep truthful. `docs/` holds fifteen documents; see the table in `README.md`.
 - A protocol change that leaves a stale example anywhere is an incomplete change.
 
 ## Working notes

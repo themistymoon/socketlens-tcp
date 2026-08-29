@@ -172,10 +172,10 @@ and per-connection state in full.
 
 SocketLens TCP makes this observable with two demonstrations, both ordinary TCP behaviour:
 
-| Demonstration     | What it sends                                                                                                          | Example                                                             |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **Fragmentation** | **one** message in **seven** TCP writes, with cuts placed inside the CRLF delimiters and inside a multi-byte character | [`examples/05-fragmented-message`](examples/05-fragmented-message/) |
-| **Coalescing**    | **two** messages in **one** TCP write, which the receiver must separate on `Content-Length` alone                      | [`examples/06-coalesced-messages`](examples/06-coalesced-messages/) |
+| Demonstration     | What it sends                                                                                                                  | Example                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| **Fragmentation** | **one** message in **seven** application writes, with cuts placed inside the CRLF delimiters and inside a multi-byte character | [`examples/05-fragmented-message`](examples/05-fragmented-message/) |
+| **Coalescing**    | **two** messages in **one** application write, which the receiver must separate on `Content-Length` alone                      | [`examples/06-coalesced-messages`](examples/06-coalesced-messages/) |
 
 Example 05 also includes a byte-at-a-time variant — one `write()` per byte, the pathological
 case for any parser assuming a read contains a whole message. Examples 09 and 10 show the

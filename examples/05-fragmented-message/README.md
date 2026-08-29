@@ -1,4 +1,4 @@
-# 05 — One message, seven TCP writes
+# 05 — One message, seven application writes
 
 ## What this demonstrates
 

@@ -464,7 +464,7 @@ be framed". Compare `408 TEST TIMEOUT`, a 4xx, in §6.6.
 
 ### 6.3 A deliberately fragmented message
 
-**Example 05.** One 134-byte request written as **seven** separate TCP writes of sizes
+**Example 05.** One 134-byte request written as **seven** separate application writes of sizes
 6, 14, 18, 22, 47, 13, 14, with a 25 ms pause between them. The cuts land inside the start
 line, inside a header, and inside the body.
 
@@ -481,20 +481,21 @@ socketlens run --operation PING --fragment 12,8,40 --raw
 In the interface: set **Transmission → fragmented**, enter fragment sizes such as
 `6, 14, 18, 22`, and run.
 
-**What to look for.** The result panel reports **7 write(s)** under "Writes out". The TCP
-segments list shows seven `→` entries, each with its own offset in milliseconds and its own
-partial bytes — you can see a header cut in half across two entries. The **timeline**,
-however, shows **one** outbound message. And the rule that fired matches on _body content_,
-which could only have happened if the peer reassembled all seven fragments into one message
-before matching.
+**What to look for.** The result panel reports **7 write(s)** under "Writes out". The **wire
+writes and reads** list shows seven `→` entries, each with its own offset in milliseconds and
+its own partial bytes — you can see a header cut in half across two entries. Those are seven
+calls to `socket.write()`, not seven TCP segments: how many segments the kernel produced is
+its decision and is not visible from the socket API. The **timeline**, however, shows **one**
+outbound message. And the rule that fired matches on _body content_, which could only have
+happened if the peer reassembled all seven fragments into one message before matching.
 
 The bundle also contains a `byte-at-a-time` variant that writes the same request in 134
 separate writes, one byte each.
 
 **What it proves about TCP.** A message boundary is not a write boundary. The sender chose
-seven writes; the receiver saw one message. Any parser that assumes a read contains a whole
-message — or even a whole line — is wrong, and the byte-at-a-time variant is the case that
-breaks it fastest.
+seven application writes; the receiver saw one message. Any parser that assumes a read
+contains a whole message — or even a whole line — is wrong, and the byte-at-a-time variant is
+the case that breaks it fastest.
 
 ### 6.4 Two coalesced messages
 
@@ -514,7 +515,8 @@ messages. The CLI result view calls this out explicitly, noting how many SLTP re
 framed from how many reads.
 
 **What it proves about TCP.** This is the exact inverse of §6.3, and together they are the
-whole argument. One write produced two messages; seven writes produced one. **Nothing at the
+whole argument. Example 06's one application write produced two messages; example 05's seven
+application writes produced one. **Nothing at the
 socket layer can distinguish these cases, because at that layer there is nothing to
 distinguish.** TCP guarantees a reliable, ordered byte stream and nothing more. Every
 protocol built on it must define its own framing — SLTP uses the `\r\n\r\n` delimiter plus an
@@ -540,11 +542,13 @@ socketlens run --operation PING --expect-status 200
 ```
 
 **What to look for.** The test **passes**. The result panel's Duration shows at least 400 ms,
-and in the TCP segments list the inbound `←` entry carries a `+400 ms`-ish offset while the
-outbound `→` entry sits near zero. The gap is visible in the segment timings.
+and in the wire writes and reads list the inbound `←` entry carries a `+400 ms`-ish offset
+while the outbound `→` entry sits near zero. The gap is visible in the per-write and per-read
+timings.
 
 **What it proves about TCP.** Latency is not failure. A slow peer is still a correct peer,
-and the timing data is recorded per segment so you can tell "the network was slow" from "the
+and the timing data is recorded per write and per read so you can tell "the network was slow"
+from "the
 peer sent the wrong thing". This also sets up the contrast with the next case: the only
 difference between a delay and a timeout is which side of the deadline the response lands
 on.
