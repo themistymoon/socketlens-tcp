@@ -15,15 +15,14 @@ features of the tool.
 Instructions are written for **Windows first**, because that is where loopback capture needs
 an extra step. Linux and macOS notes are in §9.
 
-> **Verification status of this document.** The Npcap side was checked on the development
-> machine: `DriverQuery.exe` reports
-> `\Device\NPF_Loopback (Adapter for loopback traffic capture)` on Npcap 1.88, which is the
-> interface name §2 tells you to look for. The demo helper's output was checked end to end,
-> and the local ports it prints were confirmed against `netstat` as real `ESTABLISHED`
-> loopback connections to port 7420. **The Wireshark GUI steps in §3–§6 have not been
-> executed**, because no Wireshark or `tshark` binary is installed here — they are written
-> from the documented filter and menu syntax. Walk through them once yourself before
-> presenting, and see the screenshot checklist in §10.
+> **Verification status of this document.** The workflow was executed on the Windows
+> development machine on 2026-08-29 with Wireshark/TShark 4.6.7 and Npcap 1.88. Wireshark
+> showed `\Device\NPF_Loopback (Adapter for loopback traffic capture)`, the demo helper ran
+> all eight scenarios against commit `4d1c6a1`, and the saved capture was checked with
+> TShark. The resulting packet files and cursor-free screenshots are in
+> `evidence/wireshark-2026-08-29/`. The full capture used the capture filter
+> `tcp port 7420`; consequently it records the control-server exchange for `delay`, but not
+> that scenario's separate mock-endpoint connection.
 
 ---
 
@@ -475,21 +474,31 @@ mixing them up is the usual first mistake.
 
 ---
 
-## 10. Screenshot checklist
+## 10. Screenshot checklist and recorded evidence
 
-No screenshots are included in this repository — capture your own, on your own machine, so
-they match your environment and your port numbers. These eight cover the argument:
+The repository includes the completed capture set in `evidence/wireshark-2026-08-29/`.
+These files cover the eight claims in the original checklist:
 
-| #   | Screenshot                                                                            | Purpose                                           |
-| --- | ------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1   | Wireshark interface list with the loopback adapter visible                            | Shows the capture is genuinely on loopback        |
-| 2   | Packet list, filter `tcp.port == 7420`, the three-way handshake at the top            | Real TCP, real connection setup                   |
-| 3   | _Follow TCP Stream_ of the `ping` exchange, whole SLTP request and response readable  | The protocol is our own, plaintext, and not HTTP  |
-| 4   | Same stream in **Hex Dump** with `0d 0a 0d 0a` visible                                | The header delimiter really is four bytes         |
-| 5   | The `utf8` body in Hex Dump next to the terminal's "12 characters, 36 bytes" line     | `Content-Length` counts bytes, not characters     |
-| 6   | Terminal showing "6 application writes" beside the packet list filtered `tcp.len > 0` | Writes and segments are different numbers         |
-| 7   | _Follow TCP Stream_ of `coalescing`, both start lines with nothing between them       | One write, two messages, no delimiter             |
-| 8   | The `malformed` exchange: `400 BAD REQUEST`, `Connection: close`, and the FIN         | A fatal framing fault is stated and then acted on |
+| #   | Evidence file(s)                                                               | Purpose                                           |
+| --- | ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| 1   | `08-loopback-interface.jpg`                                                    | Shows the capture is genuinely on loopback        |
+| 2   | `01-capture-overview.jpg`, `02-ping-filtered.jpg`                              | Real TCP, real connection setup                   |
+| 3   | `03-ping-follow-stream.jpg`                                                    | The protocol is our own, plaintext, and not HTTP  |
+| 4   | `04-ping-hex-framing.jpg`                                                      | The header delimiter really is four bytes         |
+| 5   | `09-utf8-byte-length.jpg`                                                      | `Content-Length` counts bytes, not characters     |
+| 6   | `05-fragmentation-six-writes.jpg`                                              | The observed TCP segmentation for the split send  |
+| 7   | `06-coalescing-one-write-two-responses.jpg`, `10-coalescing-follow-stream.jpg` | One write carries two framed messages             |
+| 8   | `07-malformed-400-close.jpg`, `11-malformed-fin-close.jpg`                     | A fatal framing fault is stated and then acted on |
+
+The fragmentation screenshot shows six payload-carrying TCP segments in this particular
+loopback run. The demo output independently reports six calls to `socket.write()` with sizes
+`6+14+18+24+40+33`. Those two counts happen to match here, but Wireshark cannot prove how
+many application writes occurred and they must not be treated as equivalent in general.
+
+Two packet files are retained: `socketlens-essential-4d1c6a1.pcapng` is the compact fallback
+used for the core screenshots, while `socketlens-full-4d1c6a1.pcapng` is the complete
+port-7420 capture from an eight-scenario generator run. Their hashes and exact scope are in
+the evidence directory's `README.md`.
 
 Optional extras: **Statistics → Conversations → TCP** during `concurrent` (three streams side
 by side), and the 750 ms gap in the `delay` scenario with the time format set to seconds since
